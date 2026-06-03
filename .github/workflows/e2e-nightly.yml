@@ -1,0 +1,46 @@
+name: ADAPT — HappyQ E2E (Nightly)
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # 1am UTC daily
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+
+jobs:
+  e2e-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run full HappyQ E2E suite
+        env:
+          BASE_URL: ${{ secrets.HAPPYQ_STAGING_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEST_USER_STANDARD_EMAIL: ${{ secrets.TEST_USER_STANDARD_EMAIL }}
+          TEST_USER_STANDARD_PASSWORD: ${{ secrets.TEST_USER_STANDARD_PASSWORD }}
+          TEST_USER_FRONT_DESK_EMAIL: ${{ secrets.TEST_USER_FRONT_DESK_EMAIL }}
+          TEST_USER_FRONT_DESK_PASSWORD: ${{ secrets.TEST_USER_FRONT_DESK_PASSWORD }}
+          TEST_USER_CLINICIAN_EMAIL: ${{ secrets.TEST_USER_CLINICIAN_EMAIL }}
+          TEST_USER_CLINICIAN_PASSWORD: ${{ secrets.TEST_USER_CLINICIAN_PASSWORD }}
+          TEST_USER_BILLING_EMAIL: ${{ secrets.TEST_USER_BILLING_EMAIL }}
+          TEST_USER_BILLING_PASSWORD: ${{ secrets.TEST_USER_BILLING_PASSWORD }}
+          ENV: staging
+        run: npm run test:happyq
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-nightly
+          path: projects/happyq/playwright-report/
+          retention-days: 30

@@ -1,0 +1,19 @@
+{
+  "name": "adapt",
+  "version": "1.0.0",
+  "description": "ADAPT — Automated Data-driven Playwright Testing by DeepTree",
+  "private": true,
+  "scripts": {
+    "test:happyq": "playwright test --config=projects/happyq/playwright.config.ts",
+    "test:happyq:headed": "playwright test --config=projects/happyq/playwright.config.ts --headed",
+    "test:happyq:report": "playwright show-report projects/happyq/playwright-report",
+    "install:browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "typescript": "^5.4.0",
+    "xlsx": "^0.18.5",
+    "dotenv": "^16.4.5",
+    "axios": "^1.7.2"
+  }
+}

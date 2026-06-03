@@ -1,0 +1,18 @@
+node_modules/
+dist/
+
+# Auth session files — contain sensitive tokens
+projects/**/.auth/*.json
+
+# Local env files — contain credentials
+projects/**/.env
+.env
+
+# Playwright output
+projects/**/playwright-report/
+projects/**/test-results/
+projects/**/screenshots/
+
+# OS
+.DS_Store
+Thumbs.db
