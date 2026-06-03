@@ -6,7 +6,7 @@ import { StatusLogsPage } from '../../pages/appointments/StatusLogsPage';
 import { BookAppointmentDialog } from '../../pages/appointments/dialogs/BookAppointmentDialog';
 import { getRunId, tagWithRunId } from '../../../../core/lib/run-id';
 
-test.use({ storageState: path.resolve(__dirname, '../../.auth/front_desk.json') });
+test.use({ storageState: path.resolve(__dirname, '../../.auth/receptionist.json') });
 
 const runId = getRunId(path.resolve(__dirname, '../..'));
 

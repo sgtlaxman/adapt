@@ -138,6 +138,19 @@ export class ExampleDialog {
 ```
 Examples: `AUTH-E2E-001`, `PAT-E2E-003`, `BIL-E2E-007`, `RBA-BIL-001`
 
+### 5.4 HappyQ Role Names & storageState Files
+
+| Role | storageState File | Access Scope |
+|------|------------------|-------------|
+| `STANDARD` | `.auth/standard.json` | General access |
+| `RECEPTIONIST` | `.auth/receptionist.json` | Reception, appointments, patients |
+| `DOCTOR` | `.auth/doctor.json` | Consultant room, patient history |
+| `ACCOUNTANT` | `.auth/accountant.json` | Billing module only |
+
+These role names are specific to HappyQ. Other projects define their own roles in `TEST_USERS` Excel sheet and `.env.example`. The storageState filename is always the role name lowercased.
+
+---
+
 ### 5.3 Module Prefixes
 | Module | Prefix |
 |--------|--------|

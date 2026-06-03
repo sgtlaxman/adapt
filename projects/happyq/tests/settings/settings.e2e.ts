@@ -60,7 +60,7 @@ test.describe('Settings — Queues', () => {
 });
 
 test.describe('RBA — Settings denied for Front Desk', () => {
-  test.use({ storageState: path.resolve(__dirname, '../../.auth/front_desk.json') });
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/receptionist.json') });
 
   test('RBA-SET-001: Front Desk cannot access user settings', async ({ page }) => {
     const usersPage = new SettingsUsersPage(page);
@@ -70,7 +70,7 @@ test.describe('RBA — Settings denied for Front Desk', () => {
 });
 
 test.describe('RBA — Settings denied for Clinician', () => {
-  test.use({ storageState: path.resolve(__dirname, '../../.auth/clinician.json') });
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/doctor.json') });
 
   test('RBA-SET-002: Clinician cannot access user settings', async ({ page }) => {
     const usersPage = new SettingsUsersPage(page);

@@ -108,6 +108,19 @@ projects/<name>/
 
 ---
 
+## HappyQ Roles
+
+| Role Key | storageState File | Access Scope |
+|----------|------------------|-------------|
+| `STANDARD` | `.auth/standard.json` | General access |
+| `RECEPTIONIST` | `.auth/receptionist.json` | Reception, appointments, patients |
+| `DOCTOR` | `.auth/doctor.json` | Consultant room, patient history |
+| `ACCOUNTANT` | `.auth/accountant.json` | Billing module only |
+
+> Role names are project-specific. Each project defines its own roles in the `TEST_USERS` Excel sheet and `.env.example`. The storageState filename is always the role name lowercased (e.g. `ACCOUNTANT` → `.auth/accountant.json`).
+
+---
+
 ## Credentials
 
 | Where | What Goes There |

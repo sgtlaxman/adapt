@@ -6,7 +6,7 @@ import { BillingReportsPage } from '../../pages/billing/BillingReportsPage';
 import { BillingSettlementPage } from '../../pages/billing/BillingSettlementPage';
 import { BillingDailyCashPage } from '../../pages/billing/BillingDailyCashPage';
 
-test.use({ storageState: path.resolve(__dirname, '../../.auth/billing.json') });
+test.use({ storageState: path.resolve(__dirname, '../../.auth/accountant.json') });
 
 test.describe('Billing — Dashboard', () => {
   test('BIL-E2E-001: Billing dashboard loads', async ({ page }) => {
@@ -73,8 +73,8 @@ test.describe('Billing — Settlement & Daily Cash', () => {
   });
 });
 
-test.describe('RBA — Billing denied for Clinician', () => {
-  test.use({ storageState: path.resolve(__dirname, '../../.auth/clinician.json') });
+test.describe('RBA — Billing denied for Doctor', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/doctor.json') });
 
   test('RBA-BIL-001: Clinician cannot access billing dashboard', async ({ page }) => {
     const billingPage = new BillingPage(page);
@@ -83,8 +83,8 @@ test.describe('RBA — Billing denied for Clinician', () => {
   });
 });
 
-test.describe('RBA — Billing denied for Front Desk', () => {
-  test.use({ storageState: path.resolve(__dirname, '../../.auth/front_desk.json') });
+test.describe('RBA — Billing denied for Receptionist', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/receptionist.json') });
 
   test('RBA-BIL-002: Front Desk cannot access billing dashboard', async ({ page }) => {
     const billingPage = new BillingPage(page);

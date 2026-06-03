@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import path from 'path';
 import { ReceptionPage } from '../../pages/reception/ReceptionPage';
 
-test.use({ storageState: path.resolve(__dirname, '../../.auth/front_desk.json') });
+test.use({ storageState: path.resolve(__dirname, '../../.auth/receptionist.json') });
 
 test.describe('Reception — Queue', () => {
   test('REC-E2E-001: Reception page loads', async ({ page }) => {
@@ -33,8 +33,8 @@ test.describe('Reception — Queue', () => {
   });
 });
 
-test.describe('RBA — Reception denied for Billing role', () => {
-  test.use({ storageState: path.resolve(__dirname, '../../.auth/billing.json') });
+test.describe('RBA — Reception denied for Accountant role', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/accountant.json') });
 
   test('RBA-REC-001: Billing role cannot access reception', async ({ page }) => {
     const receptionPage = new ReceptionPage(page);
