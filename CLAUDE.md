@@ -241,27 +241,41 @@ const name = tagWithRunId('John Doe', runId);  // → 'John Doe [ADAPT-20260603-
 
 **Trigger phrases:** "add a new project", "onboard a new app", "set up testing for <app>"
 
-Follow this exact sequence every time:
+### What Is Automated vs. Manual
 
-| Step | Action | File / Location |
-|------|--------|----------------|
-| 1 | Create folder structure | `projects/<name>/pages/`, `tests/`, `data/`, `.auth/`, `screenshots/` |
-| 2 | Copy `playwright.config.ts` from `happyq`, update `BASE_URL` default and project name | `projects/<name>/playwright.config.ts` |
-| 3 | Copy `global-setup.ts` from `happyq`, update import paths | `projects/<name>/global-setup.ts` |
-| 4 | Create `.env.example` — document `BASE_URL`, `SLACK_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLEANUP`, `ENV`, and one `EMAIL_ENV_KEY` + `PASSWORD_ENV_KEY` per role | `projects/<name>/.env.example` |
-| 5 | Copy `pages/BasePage.ts` from `happyq` | `projects/<name>/pages/BasePage.ts` |
-| 6 | Audit every screen in the app — route, heading, buttons, forms, dialogs | App source code |
-| 7 | Create all page objects | `projects/<name>/pages/<module>/<Screen>Page.ts` |
-| 8 | Create all dialog classes | `projects/<name>/pages/<module>/dialogs/<Dialog>Dialog.ts` |
-| 9 | Write all test files | `projects/<name>/tests/<module>/<module>.e2e.ts` |
-| 10 | Create test data definition file | `scripts/testdata/<name>.mjs` |
-| 11 | Run testbook generator | `npm run update:testbook -- --project <name>` |
-| 12 | Add GitHub Actions workflows | `.github/workflows/e2e-on-push.yml`, `e2e-nightly.yml` |
-| 13 | Add npm test script to `package.json` | `"test:<name>": "playwright test --config=projects/<name>/playwright.config.ts"` |
+| Asset | How Created |
+|-------|------------|
+| Folder structure (`pages/`, `tests/`, `data/`, `.auth/`, `screenshots/`) | ✅ `npm run new:project -- --name <name>` |
+| `playwright.config.ts` — copied from `happyq`, project name patched | ✅ `npm run new:project -- --name <name>` |
+| `global-setup.ts` — copied from `happyq`, import paths patched | ✅ `npm run new:project -- --name <name>` |
+| `.env.example` — with all required placeholder vars | ✅ `npm run new:project -- --name <name>` |
+| `pages/BasePage.ts` — copied from `happyq` | ✅ `npm run new:project -- --name <name>` |
+| `scripts/testdata/<name>.mjs` — blank definition file, correct export structure | ✅ `npm run new:project -- --name <name>` |
+| `data/<ProjectName>_Tests.xlsx` — empty workbook with correct sheet schema | ✅ `npm run new:project -- --name <name>` (runs `update:testbook` internally) |
+| Page objects `pages/<module>/<Screen>Page.ts` | ❌ Manual — requires knowledge of app screens |
+| Dialog classes `pages/<module>/dialogs/<Dialog>Dialog.ts` | ❌ Manual — requires knowledge of app modals |
+| Test files `tests/<module>/<module>.e2e.ts` | ❌ Manual — requires knowledge of user journeys |
+| GitHub Actions workflows | ❌ Manual — copy and adapt from `happyq` workflows |
+| npm test script in `package.json` | ❌ Manual — add `"test:<name>"` entry |
 
-**Commands to run:**
+### Step-by-Step Sequence
+
+| Step | Action | Command / File |
+|------|--------|---------------|
+| 1 | Scaffold the project — creates all folders, config files, blank testdata, empty Excel | `npm run new:project -- --name <name>` |
+| 2 | Audit every screen in the app — route, heading, buttons, forms, dialogs | App source code |
+| 3 | Create all page objects | `projects/<name>/pages/<module>/<Screen>Page.ts` |
+| 4 | Create all dialog classes | `projects/<name>/pages/<module>/dialogs/<Dialog>Dialog.ts` |
+| 5 | Write all test files | `projects/<name>/tests/<module>/<module>.e2e.ts` |
+| 6 | Fill in test rows in the testdata definition file | `scripts/testdata/<name>.mjs` |
+| 7 | Update Excel with test rows | `npm run update:testbook -- --project <name>` |
+| 8 | Add GitHub Actions workflows | `.github/workflows/` |
+| 9 | Add npm test script to `package.json` | `"test:<name>": "playwright test --config=..."` |
+
+### Commands Summary
 ```bash
-npm run update:testbook -- --project <name>   # generates Excel testbook
+npm run new:project -- --name <name>          # scaffold everything — run once
+npm run update:testbook -- --project <name>   # update Excel after adding test rows
 ```
 
 > `npm run install:browsers` is NOT needed per project. Run it only once when setting up
