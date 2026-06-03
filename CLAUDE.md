@@ -196,7 +196,35 @@ Every `projects/<name>/playwright.config.ts` MUST:
 
 ---
 
-## 9. Adding a New Project — Checklist
+## 9. Test Data Tagging Convention
+
+Every record created by a test MUST be tagged with the current Run ID so cleanup can find it.
+
+### How to Tag
+```typescript
+import { getRunId, tagWithRunId } from '../../../../core/lib/run-id';
+
+const runId = getRunId(__dirname);  // reads .current-run-id
+const name = tagWithRunId('John Doe', runId);  // → 'John Doe [ADAPT-20260603-1430]'
+```
+
+### What Gets Tagged
+| Data Type | Field Tagged | Example Value |
+|-----------|-------------|---------------|
+| Patient | `name` | `John Doe [ADAPT-20260603-1430]` |
+| Task | `title` | `Test Task [ADAPT-20260603-1430]` |
+| Document | `title` | `Test Document [ADAPT-20260603-1430]` |
+| Appointment | via patient cascade | — |
+| Bill / Invoice | via patient cascade | — |
+
+### Cleanup
+- Run with `CLEANUP=true` to delete all `ADAPT-*` tagged records before the suite starts
+- Cleanup uses the Supabase service role key — ONLY point at test/staging, never production
+- Cleanup runs in `global-setup.ts` before auth setup and before any tests
+
+---
+
+## 10. Adding a New Project — Checklist
 
 When asked to add a new project to ADAPT, always follow this order:
 

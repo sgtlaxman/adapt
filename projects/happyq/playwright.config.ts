@@ -7,6 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173';
 
 export default defineConfig({
+  globalSetup: './global-setup.ts',
   testDir: './tests',
   use: {
     baseURL: BASE_URL,
