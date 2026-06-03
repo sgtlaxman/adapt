@@ -237,25 +237,63 @@ const name = tagWithRunId('John Doe', runId);  // → 'John Doe [ADAPT-20260603-
 
 ---
 
-## 10. Adding a New Module to an Existing Project
+## 10. Scenario A — Adding a New Project to ADAPT
 
-When a new module or screen is added to an app under test, follow this exact order:
+**Trigger phrases:** "add a new project", "onboard a new app", "set up testing for <app>"
 
-| Step | Action | Where |
-|------|--------|-------|
-| 1 | Audit the new screen — route, heading, buttons, forms, dialogs | App source code |
-| 2 | Create `pages/<module>/<Screen>Page.ts` extending `BasePage` | `projects/<name>/pages/` |
-| 3 | Create `pages/<module>/dialogs/<Dialog>Dialog.ts` for each modal | `projects/<name>/pages/<module>/dialogs/` |
-| 4 | Write `tests/<module>/<module>.e2e.ts` using page objects | `projects/<name>/tests/` |
-| 5 | Add new rows to `scripts/testdata/<project>.mjs` — both `testControl` and `e2eTests` arrays | `scripts/testdata/` |
-| 6 | Run `npm run update:testbook -- --project <name>` | Terminal |
-| 7 | Verify Excel — new rows added, existing user edits preserved | Excel workbook |
+Follow this exact sequence every time:
 
-**Never regenerate from scratch — always use `update:testbook` which smart-merges.**
+| Step | Action | File / Location |
+|------|--------|----------------|
+| 1 | Create folder structure | `projects/<name>/pages/`, `tests/`, `data/`, `.auth/`, `screenshots/` |
+| 2 | Copy `playwright.config.ts` from `happyq`, update `BASE_URL` default and project name | `projects/<name>/playwright.config.ts` |
+| 3 | Copy `global-setup.ts` from `happyq`, update import paths | `projects/<name>/global-setup.ts` |
+| 4 | Create `.env.example` — document `BASE_URL`, `SLACK_WEBHOOK_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CLEANUP`, `ENV`, and one `EMAIL_ENV_KEY` + `PASSWORD_ENV_KEY` per role | `projects/<name>/.env.example` |
+| 5 | Copy `pages/BasePage.ts` from `happyq` | `projects/<name>/pages/BasePage.ts` |
+| 6 | Audit every screen in the app — route, heading, buttons, forms, dialogs | App source code |
+| 7 | Create all page objects | `projects/<name>/pages/<module>/<Screen>Page.ts` |
+| 8 | Create all dialog classes | `projects/<name>/pages/<module>/dialogs/<Dialog>Dialog.ts` |
+| 9 | Write all test files | `projects/<name>/tests/<module>/<module>.e2e.ts` |
+| 10 | Create test data definition file | `scripts/testdata/<name>.mjs` |
+| 11 | Run testbook generator | `npm run update:testbook -- --project <name>` |
+| 12 | Add GitHub Actions workflows | `.github/workflows/e2e-on-push.yml`, `e2e-nightly.yml` |
+| 13 | Add npm test script to `package.json` | `"test:<name>": "playwright test --config=projects/<name>/playwright.config.ts"` |
+
+**Commands to run:**
+```bash
+npm run update:testbook -- --project <name>   # generates Excel testbook
+npm run install:browsers                       # installs Chromium if not already done
+```
 
 ---
 
-## 11. update-testbook.mjs — Merge Rules
+## 11. Scenario B — Adding a New Module to an Existing Project
+
+**Trigger phrases:** "add a new module", "there is a new screen", "we built a new feature", "add tests for <module>"
+
+Follow this exact sequence every time:
+
+| Step | Action | File / Location |
+|------|--------|----------------|
+| 1 | Audit the new screen in the app — route, heading, buttons, inputs, dialogs | App source code |
+| 2 | Create page object | `projects/<name>/pages/<module>/<Screen>Page.ts` |
+| 3 | Create dialog classes for every modal on that screen | `projects/<name>/pages/<module>/dialogs/<Dialog>Dialog.ts` |
+| 4 | Write test file with journeys and RBA checks if role-restricted | `projects/<name>/tests/<module>/<module>.e2e.ts` |
+| 5 | Add new rows to the test data definition file — both `testControl` and `e2eTests` arrays | `scripts/testdata/<name>.mjs` |
+| 6 | Run testbook updater | `npm run update:testbook -- --project <name>` |
+| 7 | Verify Excel — confirm new rows added, existing `TEST_DATA` / `RUN` / `NOTES` untouched | Excel workbook |
+
+**Command to run:**
+```bash
+npm run update:testbook -- --project <name>
+```
+
+**Never delete and recreate the Excel — always use `update:testbook`.**
+The merge engine preserves all user edits and flags removed tests as `[OBSOLETE]`.
+
+---
+
+## 12. update-testbook.mjs — Merge Rules
 
 The `update-testbook.mjs` script is the ONLY way to update an Excel testbook.
 
@@ -263,33 +301,19 @@ The `update-testbook.mjs` script is the ONLY way to update an Excel testbook.
 |----------|-----------|
 | TEST_ID in script only (new) | Row added to Excel |
 | TEST_ID in both script and Excel | Structural columns updated from script; `TEST_DATA`, `RUN`, `NOTES` preserved from Excel |
-| TEST_ID in Excel only (removed from script) | Row kept, `NOTES` flagged `[OBSOLETE]` |
-| `TEST_USERS` sheet | Always replaced — no user edits expected |
-| `RESULTS` sheet | Never touched — runner owns this |
+| TEST_ID in Excel only (removed from script) | Row kept, `NOTES` flagged `[OBSOLETE]` — never silently deleted |
+| `TEST_USERS` sheet | Always replaced — no user edits expected here |
+| `RESULTS` sheet | Never touched — test runner owns this |
 
-### User-Owned Columns (never overwritten by script)
-- `TEST_DATA` — user fills with meaningful test values
-- `RUN` — user controls YES/NO per test case
-- `NOTES` — user adds context or skip reasons
+### User-Owned Columns (never overwritten)
+| Column | Purpose |
+|--------|---------|
+| `TEST_DATA` | User fills with meaningful real-looking test values |
+| `RUN` | User sets `YES`/`NO` to control which tests execute |
+| `NOTES` | User adds context, skip reasons, or observations |
 
 ### Script-Owned Columns (always updated from script)
-- `TEST_ID`, `MODULE`, `SCREEN`, `LAYER`, `PRIORITY`
-- `TEST_NAME`, `DESCRIPTION`, `PRECONDITIONS`, `EXPECTED_RESULT`, `USER_ROLE`
-
----
-
-## 12. Adding a New Project — Checklist
-
-When asked to add a new project to ADAPT, always follow this order:
-
-1. Create `projects/<name>/` folder structure
-2. Copy and adapt `playwright.config.ts` from `happyq`
-3. Create `.env.example` with all required vars
-4. Audit the app's screens → create all `pages/<module>/<Screen>Page.ts`
-5. Audit all modals/dialogs → create `pages/<module>/dialogs/<Dialog>Dialog.ts`
-6. Write `tests/<module>/<module>.e2e.ts` using the page objects
-7. Create `data/<ProjectName>_Tests.xlsx` with correct sheet schema
-8. Add GitHub Actions workflow referencing the new project
+`TEST_ID`, `MODULE`, `SCREEN`, `LAYER`, `PRIORITY`, `TEST_NAME`, `DESCRIPTION`, `PRECONDITIONS`, `EXPECTED_RESULT`, `USER_ROLE`
 
 ---
 
