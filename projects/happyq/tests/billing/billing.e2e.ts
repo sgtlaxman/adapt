@@ -1,11 +1,14 @@
 import { test } from '@playwright/test';
 import path from 'path';
 import { BillingPage } from '../../pages/billing/BillingPage';
+import { BillingOutstandingPage } from '../../pages/billing/BillingOutstandingPage';
+import { BillingReportsPage } from '../../pages/billing/BillingReportsPage';
+import { BillingSettlementPage } from '../../pages/billing/BillingSettlementPage';
+import { BillingDailyCashPage } from '../../pages/billing/BillingDailyCashPage';
 
-// Billing module tests run as Billing role
 test.use({ storageState: path.resolve(__dirname, '../../.auth/billing.json') });
 
-test.describe('Billing', () => {
+test.describe('Billing — Dashboard', () => {
   test('BIL-E2E-001: Billing dashboard loads', async ({ page }) => {
     const billingPage = new BillingPage(page);
     await billingPage.goto();
@@ -17,18 +20,73 @@ test.describe('Billing', () => {
     await billingPage.gotoHistory();
     await billingPage.expectLoaded();
   });
+});
 
+test.describe('Billing — Outstanding', () => {
   test('BIL-E2E-003: Outstanding balances page loads', async ({ page }) => {
-    const billingPage = new BillingPage(page);
-    await billingPage.gotoOutstanding();
+    const outstandingPage = new BillingOutstandingPage(page);
+    await outstandingPage.goto();
+    await outstandingPage.expectLoaded();
+  });
+
+  test('BIL-E2E-004: Filter outstanding by Contacted tab', async ({ page }) => {
+    const outstandingPage = new BillingOutstandingPage(page);
+    await outstandingPage.goto();
+    await outstandingPage.expectLoaded();
+    await outstandingPage.filterByStatus('contacted');
+  });
+
+  test('BIL-E2E-005: Search in outstanding balances', async ({ page }) => {
+    const outstandingPage = new BillingOutstandingPage(page);
+    await outstandingPage.goto();
+    await outstandingPage.expectLoaded();
+    await outstandingPage.search('Test');
   });
 });
 
-// RBA — Clinician should not access Billing
-test.describe('RBA — Billing access denied for Clinician', () => {
+test.describe('Billing — Reports', () => {
+  test('BIL-E2E-006: Invoice reports page loads', async ({ page }) => {
+    const reportsPage = new BillingReportsPage(page);
+    await reportsPage.goto();
+    await reportsPage.expectLoaded();
+  });
+
+  test('BIL-E2E-007: Switch to audit log tab', async ({ page }) => {
+    const reportsPage = new BillingReportsPage(page);
+    await reportsPage.goto();
+    await reportsPage.expectLoaded();
+    await reportsPage.switchToAuditLog();
+  });
+});
+
+test.describe('Billing — Settlement & Daily Cash', () => {
+  test('BIL-E2E-008: Settlement dashboard loads', async ({ page }) => {
+    const settlementPage = new BillingSettlementPage(page);
+    await settlementPage.goto();
+    await settlementPage.expectLoaded();
+  });
+
+  test('BIL-E2E-009: Daily cash dashboard loads', async ({ page }) => {
+    const dailyCashPage = new BillingDailyCashPage(page);
+    await dailyCashPage.goto();
+    await dailyCashPage.expectLoaded();
+  });
+});
+
+test.describe('RBA — Billing denied for Clinician', () => {
   test.use({ storageState: path.resolve(__dirname, '../../.auth/clinician.json') });
 
   test('RBA-BIL-001: Clinician cannot access billing dashboard', async ({ page }) => {
+    const billingPage = new BillingPage(page);
+    await billingPage.goto();
+    await billingPage.expectAccessDenied();
+  });
+});
+
+test.describe('RBA — Billing denied for Front Desk', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/front_desk.json') });
+
+  test('RBA-BIL-002: Front Desk cannot access billing dashboard', async ({ page }) => {
     const billingPage = new BillingPage(page);
     await billingPage.goto();
     await billingPage.expectAccessDenied();
