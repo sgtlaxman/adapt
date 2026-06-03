@@ -101,6 +101,48 @@ adapt/                                   ← Root framework repo
 
 ---
 
+## Understanding the Three Project Folders
+
+### The Simple Analogy
+
+Think of it like a **restaurant**:
+
+| Folder | Restaurant Analogy | In ADAPT |
+|--------|-------------------|----------|
+| **`data/`** (Excel) | The **menu + order form** — lists what to make, ingredients, who ordered it | Test cases, input data, run flags, expected results |
+| **`pages/`** | The **kitchen** — knows how to make each dish | How to interact with each screen — click, fill, navigate |
+| **`tests/`** | The **waiter** — takes the order, goes to kitchen, serves the result | Calls page actions in sequence, checks the outcome |
+
+### One Line Each
+
+- `data/` — **what** to test
+- `pages/` — **how** to interact with the app
+- `tests/` — **when** to do it and **whether** it passed
+
+### Same Idea, One Example
+
+**Scenario:** Test that a patient can be added successfully.
+
+| Folder | Its Role | Example |
+|--------|---------|---------|
+| `data/HappyQ_Tests.xlsx` | Says *what* to test and *with what data* | `TEST_ID: PAT-E2E-003`, `firstName: John`, `lastName: Doe`, `RUN: YES` |
+| `pages/patients/PatientFormPage.ts` | Knows *how* to fill the form | `fillForm()`, `submit()`, `expectSuccessToast()` |
+| `tests/patients/patients.e2e.ts` | Orchestrates the *journey* | Load data → call `fillForm()` → call `submit()` → assert toast appears |
+
+### How They Relate at Runtime
+
+```
+tests/patients/patients.e2e.ts        pages/patients/PatientFormPage.ts     Browser
+───────────────────────────────────────────────────────────────────────────────────
+data loaded from Excel
+  patientForm.fillForm(data)    →      fillForm()                    →    page.fill(...)
+  patientForm.submit()          →      submit()                      →    page.click(...)
+  patientForm
+  .expectSuccessToast()         →      expectSuccessToast()          →    expect(toast).toBeVisible()
+```
+
+---
+
 ## Adding a New Project (Plug-and-Play Steps)
 
 | Step | Action |
