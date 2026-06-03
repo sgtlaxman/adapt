@@ -1,22 +1,32 @@
 /**
  * new-project.mjs — Scaffolds a new ADAPT project.
  *
- * Usage: node scripts/new-project.mjs --name <name>
- *    or: npm run new:project -- --name <name>
+ * Usage (scaffold only):
+ *   node scripts/new-project.mjs --name <name>
+ *
+ * Usage (scaffold + scan + generate pages/dialogs/tests):
+ *   node scripts/new-project.mjs --name <name> --src <path-to-app-source>
  *
  * Creates:
  *   projects/<name>/  folder structure
  *   playwright.config.ts, global-setup.ts, .env.example
  *   pages/BasePage.ts
- *   scripts/testdata/<name>.mjs  (blank test definition file)
- *   data/<Name>_Tests.xlsx       (via update-testbook)
+ *   pages/<module>/<Screen>Page.ts      (if --src provided)
+ *   pages/<module>/dialogs/<x>Dialog.ts (if --src provided)
+ *   tests/<module>/<module>.e2e.ts      (if --src provided)
+ *   TODO_REPORT.md                      (if --src provided)
+ *   scripts/testdata/<name>.mjs
+ *   data/<Name>_Tests.xlsx              (via update-testbook)
  *   package.json test script entry
  */
 
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { detectProjectType } from './lib/detector.mjs';
+import { scanProject } from './lib/scanner.mjs';
+import { generateAll } from './lib/generator.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
@@ -25,9 +35,12 @@ const ROOT      = path.resolve(__dirname, '..');
 
 const nameArg = process.argv.indexOf('--name');
 if (nameArg === -1 || !process.argv[nameArg + 1]) {
-  console.error('\n❌  Usage: node scripts/new-project.mjs --name <projectname>\n');
+  console.error('\n❌  Usage: node scripts/new-project.mjs --name <projectname> [--src <path>]\n');
   process.exit(1);
 }
+
+const srcArg   = process.argv.indexOf('--src');
+const srcPath  = srcArg !== -1 ? process.argv[srcArg + 1] : null;
 
 const name = process.argv[nameArg + 1].toLowerCase().trim();
 
@@ -281,26 +294,101 @@ if (!pkg.scripts[`test:${name}`]) {
   created.push('package.json  (added test:' + name + ' scripts)');
 }
 
-// ─── 10. Print summary ────────────────────────────────────────────────────────
+// ─── 10. Scan source + generate pages/dialogs/tests (if --src provided) ──────
+
+let generatedFromSource = [];
+
+if (srcPath) {
+  if (!fs.existsSync(srcPath)) {
+    console.warn(`\n[ADAPT] Warning: --src path not found: ${srcPath} — skipping source scan`);
+  } else {
+    console.log(`\n[ADAPT] Source path provided — scanning: ${srcPath}`);
+
+    // Detect framework
+    const projectInfo = detectProjectType(srcPath);
+    console.log(`[ADAPT] Detected: ${projectInfo.label}`);
+
+    if (projectInfo.type === 'unknown') {
+      console.warn('[ADAPT] Warning: could not detect framework — skipping source scan');
+    } else {
+      // Scan source
+      const scanData = scanProject(srcPath, projectInfo);
+
+      // Generate pages, dialogs, tests, TODO report
+      const { files, testdataRows } = generateAll(projectDir, name, scanData);
+      generatedFromSource = files;
+
+      // Update testdata file with generated rows
+      if (testdataRows.testControl.length > 0) {
+        const tdPath = path.join(ROOT, 'scripts', 'testdata', name + '.mjs');
+        const existing = fs.readFileSync(tdPath, 'utf-8');
+
+        const controlJson = JSON.stringify(testdataRows.testControl, null, 2)
+          .replace(/^/gm, '  ').trim();
+        const e2eJson = JSON.stringify(testdataRows.e2eTests, null, 2)
+          .replace(/^/gm, '  ').trim();
+
+        const updated = existing
+          .replace('export const testControl = [\n  // Add rows here', `export const testControl = [\n  ...${controlJson},\n  // Add more rows here`)
+          .replace('export const e2eTests = [\n  // Add rows here', `export const e2eTests = [\n  ...${e2eJson},\n  // Add more rows here`);
+
+        fs.writeFileSync(tdPath, updated, 'utf-8');
+
+        // Re-run update:testbook to pick up generated rows
+        try {
+          execSync(`node scripts/update-testbook.mjs --project ${name}`, { cwd: ROOT, stdio: 'pipe' });
+        } catch (e) {
+          console.warn('[ADAPT] Warning: could not update testbook after generation');
+        }
+      }
+    }
+  }
+}
+
+// ─── 11. Print summary ────────────────────────────────────────────────────────
 
 console.log('─'.repeat(60));
 console.log(`✅  Project "${name}" scaffolded successfully!\n`);
 
-console.log('📁  Created automatically:');
+console.log('📁  Scaffold — created automatically:');
 created.forEach(f => console.log(`    ✔  ${f}`));
 
-console.log(`
+if (generatedFromSource.length > 0) {
+  console.log(`\n🤖  Generated from source scan (${srcPath}):`);
+  generatedFromSource.forEach(f => console.log(`    ✔  ${f}`));
+  console.log(`\n📋  TODO_REPORT.md created — work through it to verify selectors`);
+  console.log(`    Run: npx playwright codegen <BASE_URL>/<route>  for each ⚠️ item`);
+}
+
+if (generatedFromSource.length > 0) {
+  console.log(`
 📝  Manual steps remaining:
-    1. Audit the app screens — routes, headings, buttons, forms, dialogs
+    1. Verify selectors          →  open projects/${name}/TODO_REPORT.md
+    2. Run codegen per screen    →  npx playwright codegen <BASE_URL>/<route>
+    3. Add missing journeys      →  projects/${name}/tests/<module>/<module>.e2e.ts
+    4. Add RBA tests             →  uncomment RBA stubs in test files
+    5. Fill in TEST_DATA         →  projects/${name}/data/${label}_Tests.xlsx
+    6. Update login route        →  projects/${name}/tests/auth/auth.setup.ts
+    7. Fill in credentials       →  projects/${name}/.env  (copy from .env.example)
+    8. Add GitHub Actions        →  .github/workflows/  (copy from happyq workflows)`);
+} else {
+  console.log(`
+📝  Manual steps remaining:
+    1. Audit the app screens     →  routes, headings, buttons, forms, dialogs
     2. Create page objects       →  projects/${name}/pages/<module>/<Screen>Page.ts
     3. Create dialog classes     →  projects/${name}/pages/<module>/dialogs/<Dialog>Dialog.ts
     4. Write test files          →  projects/${name}/tests/<module>/<module>.e2e.ts
     5. Fill in test rows         →  scripts/testdata/${name}.mjs
     6. Update Excel              →  npm run update:testbook -- --project ${name}
-    7. Update login route        →  projects/${name}/tests/auth/auth.setup.ts  (check LOGIN_URL)
+    7. Update login route        →  projects/${name}/tests/auth/auth.setup.ts
     8. Fill in credentials       →  projects/${name}/.env  (copy from .env.example)
     9. Add GitHub Actions        →  .github/workflows/  (copy from happyq workflows)
 
+    💡 TIP: Re-run with --src to auto-generate pages/dialogs/tests:
+       npm run new:project -- --name ${name} --src <path-to-${name}-source>`);
+}
+
+console.log(`
 🚀  To run tests:
     npm run test:${name}
     CLEANUP=true npm run test:${name}
