@@ -237,7 +237,48 @@ const name = tagWithRunId('John Doe', runId);  // → 'John Doe [ADAPT-20260603-
 
 ---
 
-## 10. Adding a New Project — Checklist
+## 10. Adding a New Module to an Existing Project
+
+When a new module or screen is added to an app under test, follow this exact order:
+
+| Step | Action | Where |
+|------|--------|-------|
+| 1 | Audit the new screen — route, heading, buttons, forms, dialogs | App source code |
+| 2 | Create `pages/<module>/<Screen>Page.ts` extending `BasePage` | `projects/<name>/pages/` |
+| 3 | Create `pages/<module>/dialogs/<Dialog>Dialog.ts` for each modal | `projects/<name>/pages/<module>/dialogs/` |
+| 4 | Write `tests/<module>/<module>.e2e.ts` using page objects | `projects/<name>/tests/` |
+| 5 | Add new rows to `scripts/testdata/<project>.mjs` — both `testControl` and `e2eTests` arrays | `scripts/testdata/` |
+| 6 | Run `npm run update:testbook -- --project <name>` | Terminal |
+| 7 | Verify Excel — new rows added, existing user edits preserved | Excel workbook |
+
+**Never regenerate from scratch — always use `update:testbook` which smart-merges.**
+
+---
+
+## 11. update-testbook.mjs — Merge Rules
+
+The `update-testbook.mjs` script is the ONLY way to update an Excel testbook.
+
+| Scenario | Behaviour |
+|----------|-----------|
+| TEST_ID in script only (new) | Row added to Excel |
+| TEST_ID in both script and Excel | Structural columns updated from script; `TEST_DATA`, `RUN`, `NOTES` preserved from Excel |
+| TEST_ID in Excel only (removed from script) | Row kept, `NOTES` flagged `[OBSOLETE]` |
+| `TEST_USERS` sheet | Always replaced — no user edits expected |
+| `RESULTS` sheet | Never touched — runner owns this |
+
+### User-Owned Columns (never overwritten by script)
+- `TEST_DATA` — user fills with meaningful test values
+- `RUN` — user controls YES/NO per test case
+- `NOTES` — user adds context or skip reasons
+
+### Script-Owned Columns (always updated from script)
+- `TEST_ID`, `MODULE`, `SCREEN`, `LAYER`, `PRIORITY`
+- `TEST_NAME`, `DESCRIPTION`, `PRECONDITIONS`, `EXPECTED_RESULT`, `USER_ROLE`
+
+---
+
+## 12. Adding a New Project — Checklist
 
 When asked to add a new project to ADAPT, always follow this order:
 
