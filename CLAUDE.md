@@ -262,8 +262,10 @@ Follow this exact sequence every time:
 **Commands to run:**
 ```bash
 npm run update:testbook -- --project <name>   # generates Excel testbook
-npm run install:browsers                       # installs Chromium if not already done
 ```
+
+> `npm run install:browsers` is NOT needed per project. Run it only once when setting up
+> ADAPT on a new machine, or after upgrading the `@playwright/test` package version.
 
 ---
 
