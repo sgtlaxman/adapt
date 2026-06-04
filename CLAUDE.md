@@ -283,7 +283,62 @@ npm run update:testbook -- --project <name>   # update Excel after adding test r
 
 ---
 
-## 11. Scenario B — Adding a New Module to an Existing Project
+## 11. heal:selectors — Auto-Healing Workflow
+
+After generating page objects (via `new:project --src` or manually), selectors are educated guesses.
+**Always run `heal:selectors` to fix `expectLoaded()` headings before running tests.**
+
+### Usage
+
+```bash
+# Heal all modules with standard role (default)
+npm run heal:selectors -- --project happyq
+
+# Heal with a specific role (e.g. billing pages need accountant)
+npm run heal:selectors -- --project happyq --role accountant
+
+# Heal a specific module only
+npm run heal:selectors -- --project happyq --module billing
+
+# Full heal workflow — run multiple roles to cover all pages
+npm run heal:selectors -- --project happyq --role standard
+npm run heal:selectors -- --project happyq --role accountant --module billing
+npm run heal:selectors -- --project happyq --role receptionist --module reception
+```
+
+### Requires
+- App must be running at `BASE_URL` (check `.env.local`)
+- Auth sessions must be fresh — run auth setup first if sessions expired:
+  ```bash
+  npx playwright test --config=projects/happyq/playwright.config.ts --project=setup
+  ```
+
+### What It Heals
+- ✅ `expectLoaded()` heading text — replaces guessed regex with real heading string
+- ❌ Does NOT fix: button selectors, input selectors, dialog selectors — use `npx playwright codegen` for those
+
+### Output Icons
+| Icon | Meaning |
+|------|---------|
+| ✅ | Selector already correct — no change |
+| 🔧 | Healed — file updated with real heading |
+| 🔒 | Permission denied — try a different role |
+| ⏭️ | Skipped — dynamic route or no goto() |
+| ❓ | No heading found — fix manually with codegen |
+| ⚠️ | Could not patch — `expectLoaded()` uses non-heading selector (check manually) |
+
+### After DB Reset
+After `npm run db:reset` in HappyQ, sessions expire. Run in order:
+```bash
+node scripts/setup-test-users.mjs                                             # restore passwords
+npx playwright test --config=projects/happyq/playwright.config.ts --project=setup  # refresh sessions
+npm run heal:selectors -- --project happyq                                    # heal selectors
+npm run test:happyq                                                           # run tests
+```
+
+---
+
+## 12. Scenario B — Adding a New Module to an Existing Project
 
 **Trigger phrases:** "add a new module", "there is a new screen", "we built a new feature", "add tests for <module>"
 

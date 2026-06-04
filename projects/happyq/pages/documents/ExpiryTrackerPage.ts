@@ -7,7 +7,7 @@ export class ExpiryTrackerPage extends BasePage {
   async goto() { await this.page.goto('/documents/expiry'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /expiry tracker/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Unified Expiry Tracker' })).toBeVisible();
   }
 
   async filterByType(type: 'All' | 'Document' | 'Equipment') {

@@ -7,7 +7,7 @@ export class DocumentReportsPage extends BasePage {
   async goto() { await this.page.goto('/documents/reports'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /document reports/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Compliance & System Reports' })).toBeVisible();
   }
 
   async switchToCompletionReport() {

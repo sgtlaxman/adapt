@@ -388,6 +388,13 @@ if (generatedFromSource.length > 0) {
        npm run new:project -- --name ${name} --src <path-to-${name}-source>`);
 }
 
+if (generatedFromSource.length > 0) {
+  console.log(`
+⚡  Next: heal selectors (fix expectLoaded() headings against live app):
+    npm run heal:selectors -- --project ${name}
+    # Use --role <role> if some pages need a specific role to access`);
+}
+
 console.log(`
 🚀  To run tests:
     npm run test:${name}

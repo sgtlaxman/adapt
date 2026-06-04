@@ -7,6 +7,6 @@ export class BillingSettlementPage extends BasePage {
   async goto() { await this.page.goto('/billing/settlement'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /settlement/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Daily Settlement' })).toBeVisible();
   }
 }

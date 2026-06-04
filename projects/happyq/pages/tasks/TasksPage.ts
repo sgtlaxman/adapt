@@ -11,6 +11,6 @@ export class TasksPage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /tasks/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Tasks Dashboard' })).toBeVisible();
   }
 }

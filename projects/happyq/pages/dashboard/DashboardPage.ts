@@ -7,7 +7,7 @@ export class DashboardPage extends BasePage {
   async goto() { await this.page.goto('/dashboard'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /dashboard/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   }
 
   async selectDate(date: string) {

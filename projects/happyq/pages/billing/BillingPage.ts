@@ -11,7 +11,7 @@ export class BillingPage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /billing/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Search Bills' })).toBeVisible();
   }
 
   async gotoHistory() {

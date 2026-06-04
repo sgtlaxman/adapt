@@ -7,6 +7,6 @@ export class BillingDailyCashPage extends BasePage {
   async goto() { await this.page.goto('/billing/daily-cash'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /daily cash/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Daily cash' })).toBeVisible();
   }
 }

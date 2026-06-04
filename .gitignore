@@ -12,6 +12,8 @@ projects/**/.env*
 projects/**/playwright-report/
 projects/**/test-results/
 projects/**/screenshots/
+test-results/
+playwright-report/
 
 # OS
 .DS_Store

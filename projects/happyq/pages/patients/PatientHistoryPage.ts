@@ -7,7 +7,7 @@ export class PatientHistoryPage extends BasePage {
   async goto() { await this.page.goto('/patient-history'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /patient history/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Patient History for City center' })).toBeVisible();
   }
 
   async search(query: string) {

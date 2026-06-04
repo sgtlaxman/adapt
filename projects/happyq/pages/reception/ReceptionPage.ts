@@ -7,7 +7,7 @@ export class ReceptionPage extends BasePage {
   async goto() { await this.page.goto('/reception'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /reception/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Patient Management' })).toBeVisible();
   }
 
   async search(query: string) {

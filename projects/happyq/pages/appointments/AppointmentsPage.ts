@@ -7,7 +7,8 @@ export class AppointmentsPage extends BasePage {
   async goto() { await this.page.goto('/appointments'); }
 
   async expectLoaded() {
-    await expect(this.page.locator('[data-testid="calendar"], .calendar-grid, [class*="calendar"]').first()).toBeVisible({ timeout: 10000 });
+    // Calendar has no h1 — wait for the Today button which is always visible on load
+    await expect(this.page.getByRole('button', { name: /today/i })).toBeVisible({ timeout: 10000 });
   }
 
   async selectView(view: 'day' | 'week' | 'compact') {

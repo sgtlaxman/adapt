@@ -11,7 +11,7 @@ export class PatientListPage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /patients/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Patients' })).toBeVisible();
   }
 
   async search(query: string) {

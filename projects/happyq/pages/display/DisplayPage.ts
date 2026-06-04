@@ -7,7 +7,8 @@ export class DisplayPage extends BasePage {
   async goto() { await this.page.goto('/display'); }
 
   async expectLoaded() {
-    await expect(this.page.locator('[class*="queue"], [class*="display"]').first()).toBeVisible({ timeout: 10000 });
+    // Display board has no h1 — wait for page container (toolbar or board)
+    await expect(this.page.locator('main, [role="main"], #root > div').first()).toBeVisible({ timeout: 10000 });
   }
 
   async search(query: string) {

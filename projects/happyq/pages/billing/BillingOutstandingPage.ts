@@ -7,7 +7,7 @@ export class BillingOutstandingPage extends BasePage {
   async goto() { await this.page.goto('/billing/outstanding'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /outstanding/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Balance Reminders' })).toBeVisible();
   }
 
   async search(query: string) {

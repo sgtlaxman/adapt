@@ -7,7 +7,7 @@ export class StatusLogsPage extends BasePage {
   async goto() { await this.page.goto('/status-logs'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /status logs/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Status Logs' })).toBeVisible();
   }
 
   async search(query: string) {

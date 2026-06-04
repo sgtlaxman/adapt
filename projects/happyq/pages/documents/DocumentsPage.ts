@@ -11,6 +11,6 @@ export class DocumentsPage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /compliance|documents/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Compliance & Register' })).toBeVisible();
   }
 }

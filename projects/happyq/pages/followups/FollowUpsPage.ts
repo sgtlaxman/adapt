@@ -7,7 +7,7 @@ export class FollowUpsPage extends BasePage {
   async goto() { await this.page.goto('/follow-ups'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /follow.up/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Follow-Up Dashboard' })).toBeVisible();
   }
 
   async expectStatCard(title: string) {

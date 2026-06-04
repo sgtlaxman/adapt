@@ -7,7 +7,7 @@ export class AppointmentHistoryPage extends BasePage {
   async goto() { await this.page.goto('/appointment-history'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /appointment/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Search Appointment' })).toBeVisible();
   }
 
   async search(query: string) {

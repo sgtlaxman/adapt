@@ -7,7 +7,7 @@ export class ConsultantPage extends BasePage {
   async goto() { await this.page.goto('/consultant'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: /consultant room/i })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Consultant Room' })).toBeVisible();
   }
 
   async filterByQueue(queueName: string) {
