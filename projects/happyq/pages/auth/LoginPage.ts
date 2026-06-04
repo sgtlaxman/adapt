@@ -26,7 +26,8 @@ export class LoginPage extends BasePage {
   }
 
   async expectErrorMessage() {
-    const error = this.page.locator('[role="alert"], .text-destructive').first();
+    // HappyQ uses Sonner toasts for errors — check toast or form validation text
+    const error = this.page.locator('[data-sonner-toast], .text-destructive').first();
     await expect(error).toBeVisible({ timeout: 8000 });
   }
 

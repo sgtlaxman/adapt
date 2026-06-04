@@ -19,3 +19,4 @@ export class SettingsPermissionsPage extends BasePage {
     await this.waitForToast();
   }
 }
+

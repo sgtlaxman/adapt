@@ -21,3 +21,4 @@ export class SettingsOrganizationPage extends BasePage {
     await this.waitForToast();
   }
 }
+

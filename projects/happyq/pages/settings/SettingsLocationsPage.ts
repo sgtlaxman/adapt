@@ -33,3 +33,4 @@ export class SettingsLocationsPage extends BasePage {
     await expect(this.page.getByText(name)).toBeVisible();
   }
 }
+

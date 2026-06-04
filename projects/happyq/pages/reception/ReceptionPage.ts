@@ -31,7 +31,5 @@ export class ReceptionPage extends BasePage {
     await expect(this.page.locator('table tbody tr, [class*="patient-card"]').first()).toBeVisible({ timeout: 10000 });
   }
 
-  async expectAccessDenied() {
-    await expect(this.page.getByText(/not authorized|access denied|permission/i).first()).toBeVisible({ timeout: 8000 });
-  }
+  // expectAccessDenied() inherited from BasePage — uses HappyQ's exact permission message
 }

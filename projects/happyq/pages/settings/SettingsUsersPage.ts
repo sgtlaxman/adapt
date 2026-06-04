@@ -34,3 +34,4 @@ export class SettingsUsersPage extends BasePage {
     await expect(this.page.getByText(/not authorized|access denied|permission/i).first()).toBeVisible({ timeout: 8000 });
   }
 }
+

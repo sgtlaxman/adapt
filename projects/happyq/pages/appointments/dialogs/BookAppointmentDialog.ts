@@ -58,7 +58,8 @@ export class BookAppointmentDialog {
   }
 
   async cancel() {
-    await this.page.getByRole('button', { name: /close/i }).click();
+    // Scope to dialog to avoid matching other close buttons on the page
+    await this.page.getByRole('dialog').getByRole('button', { name: /close/i }).first().click();
   }
 
   async expectClosed() {

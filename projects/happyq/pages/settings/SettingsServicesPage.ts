@@ -24,3 +24,4 @@ export class SettingsServicesPage extends BasePage {
     await this.waitForToast();
   }
 }
+

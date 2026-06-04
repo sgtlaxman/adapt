@@ -19,3 +19,4 @@ export class SettingsQueuesPage extends BasePage {
     await this.waitForToast();
   }
 }
+

@@ -19,3 +19,4 @@ export class SettingsVisitPurposesPage extends BasePage {
     await this.waitForToast();
   }
 }
+
