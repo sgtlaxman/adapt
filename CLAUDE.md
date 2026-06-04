@@ -333,7 +333,60 @@ The `update-testbook.mjs` script is the ONLY way to update an Excel testbook.
 
 ---
 
-## 10. Compliance Report — Required After Every Creation Task
+## 10. Environment Targeting — Expanding Beyond Local
+
+Each project currently uses `.env.local` by default. When the user wants to add more
+environments (dev, test, staging, production), follow this exact pattern — no code changes
+needed in page objects or tests.
+
+### Adding a New Environment
+
+| Step | Action |
+|------|--------|
+| 1 | Copy the env file: `cp projects/<name>/.env.example projects/<name>/.env.<envname>` |
+| 2 | Fill in the new values: `BASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, credentials |
+| 3 | Run against the new env: `ENV_FILE=.env.<envname> npm run test:<name>` |
+
+### Environment File Naming Convention
+
+| File | Environment |
+|------|------------|
+| `.env.local` | Local dev server + local Supabase (default) |
+| `.env.dev` | Shared dev / feature branch environment |
+| `.env.test` | Dedicated test environment |
+| `.env.staging` | Staging / pre-production |
+| `.env.production` | Production — P1 smoke tests only |
+
+### How It Works — No Code Changes Needed
+
+`playwright.config.ts` and `global-setup.ts` both read `ENV_FILE`:
+
+```typescript
+const envFile = process.env.ENV_FILE ?? '.env.local';
+dotenv.config({ path: path.resolve(__dirname, envFile) });
+```
+
+Just pass the flag at runtime — everything else (page objects, tests, Excel) stays the same.
+
+### Adding Convenience npm Scripts (Optional)
+
+Add to `package.json` when the user is ready to formalise environments:
+
+```json
+"test:<name>:local":   "ENV_FILE=.env.local playwright test --config=projects/<name>/playwright.config.ts",
+"test:<name>:dev":     "ENV_FILE=.env.dev playwright test --config=projects/<name>/playwright.config.ts",
+"test:<name>:test":    "ENV_FILE=.env.test playwright test --config=projects/<name>/playwright.config.ts",
+"test:<name>:staging": "ENV_FILE=.env.staging playwright test --config=projects/<name>/playwright.config.ts"
+```
+
+### Security Rules
+- NEVER commit `.env.*` files — only `.env.example` is committed
+- `.gitignore` already covers: `projects/**/.env*` with `!projects/**/.env.example`
+- Production service role keys must ONLY go in `.env.production` and CI secrets — never local files shared across team
+
+---
+
+## 11. Compliance Report — Required After Every Creation Task
 
 After completing ANY of the following tasks:
 - Creating a new project
