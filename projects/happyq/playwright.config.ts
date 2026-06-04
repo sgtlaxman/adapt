@@ -28,10 +28,13 @@ export default defineConfig({
   projects: [
     {
       name: 'setup',
-      testMatch: /auth\.setup\.ts/,
+      testMatch: '**/auth.setup.ts',
+      use: { baseURL: BASE_URL },
     },
     {
       name: 'happyq',
+      testMatch: '**/*.e2e.ts',
+      use: { baseURL: BASE_URL },
       dependencies: ['setup'],
     },
   ],

@@ -20,6 +20,20 @@ New to ADAPT? Start at [Quick Start](#quick-start) then read [Scripts Reference]
 
 ---
 
+## After a Database Reset
+
+Every time you run `npm run db:reset` in HappyQ, the test user passwords are wiped.
+Run this from the `adapt/` folder to restore them:
+
+```bash
+node scripts/setup-test-users.mjs
+```
+
+This uses each user's email address as their password and converts them from phone to email+phone auth.
+Safe to run multiple times.
+
+---
+
 ## Quick Start
 
 ```bash

@@ -34,8 +34,11 @@ export async function runAuthSetup(
     const page = await context.newPage();
 
     await page.goto(loginUrl);
-    await page.getByLabel(/email/i).fill(email);
-    await page.getByLabel(/password/i).fill(password);
+    // Click Email tab — login page defaults to Phone/OTP tab
+    await page.getByRole('tab', { name: /email/i }).click();
+    // Use placeholder selectors — FormLabel "Email" conflicts with the tab panel aria-label
+    await page.getByPlaceholder('example@email.com').fill(email);
+    await page.getByPlaceholder('••••••••').fill(password);
     await page.getByRole('button', { name: /sign in|log in/i }).click();
     await page.waitForURL((url) => !url.pathname.includes('/auth'), { timeout: 15000 });
 
