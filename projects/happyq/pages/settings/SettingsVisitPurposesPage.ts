@@ -7,7 +7,7 @@ export class SettingsVisitPurposesPage extends BasePage {
   async goto() { await this.page.goto('/settings/visit-purposes'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Visit Purpose' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Visit Purpose' }).first()).toBeVisible();
   }
 
   async clickNewPurpose() {

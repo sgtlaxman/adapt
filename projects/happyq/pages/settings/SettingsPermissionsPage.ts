@@ -7,7 +7,7 @@ export class SettingsPermissionsPage extends BasePage {
   async goto() { await this.page.goto('/settings/permissions'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Permissions' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Permissions' }).first()).toBeVisible();
   }
 
   async expectPermissionsMatrixVisible() {

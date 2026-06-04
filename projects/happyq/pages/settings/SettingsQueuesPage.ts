@@ -7,7 +7,7 @@ export class SettingsQueuesPage extends BasePage {
   async goto() { await this.page.goto('/settings/queues'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Queues' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Queues' }).first()).toBeVisible();
   }
 
   async clickNewQueue() {

@@ -7,7 +7,7 @@ export class SettingsUsersPage extends BasePage {
   async goto() { await this.page.goto('/settings/users'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Users' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Users' }).first()).toBeVisible();
   }
 
   async clickNewUser() {
