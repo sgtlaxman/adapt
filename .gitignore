@@ -4,9 +4,9 @@ dist/
 # Auth session files — contain sensitive tokens
 projects/**/.auth/*.json
 
-# Local env files — contain credentials
-projects/**/.env
-.env
+# Local env files — contain credentials (never commit these)
+projects/**/.env*
+!projects/**/.env.example
 
 # Playwright output
 projects/**/playwright-report/

@@ -13,7 +13,8 @@ const PROJECT_DIR = __dirname;
  *   2. Generate a new Run ID for this session
  */
 export default async function globalSetup(): Promise<void> {
-  dotenv.config({ path: path.join(PROJECT_DIR, '.env') });
+  const envFile = process.env.ENV_FILE ?? '.env.local';
+  dotenv.config({ path: path.join(PROJECT_DIR, envFile) });
 
   const cleanup = process.env.CLEANUP === 'true';
 

@@ -2,7 +2,10 @@ import { defineConfig } from '@playwright/test';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+// ENV_FILE defaults to .env.local — override to target other environments later
+// e.g. ENV_FILE=.env.dev npm run test:happyq
+const envFile = process.env.ENV_FILE ?? '.env.local';
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173';
 
