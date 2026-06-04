@@ -15,11 +15,11 @@ export class ReceptionPage extends BasePage {
   }
 
   async switchToTableView() {
-    await this.page.getByRole('button', { name: /table/i }).click();
+    await this.page.getByRole('button', { name: /table view/i }).click();
   }
 
   async switchToCardView() {
-    await this.page.getByRole('button', { name: /card/i }).click();
+    await this.page.getByRole('button', { name: /card view/i }).click();
   }
 
   async filterByQueue(queueName: string) {

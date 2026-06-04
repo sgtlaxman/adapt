@@ -1,6 +1,7 @@
 import { test } from '@playwright/test';
 import path from 'path';
 import { BillingPage } from '../../pages/billing/BillingPage';
+import { BillingHistoryPage } from '../../pages/billing/BillingHistoryPage';
 import { BillingOutstandingPage } from '../../pages/billing/BillingOutstandingPage';
 import { BillingReportsPage } from '../../pages/billing/BillingReportsPage';
 import { BillingSettlementPage } from '../../pages/billing/BillingSettlementPage';
@@ -16,9 +17,9 @@ test.describe('Billing — Dashboard', () => {
   });
 
   test('BIL-E2E-002: Billing history page loads', async ({ page }) => {
-    const billingPage = new BillingPage(page);
-    await billingPage.gotoHistory();
-    await billingPage.expectLoaded();
+    const historyPage = new BillingHistoryPage(page);
+    await historyPage.goto();
+    await historyPage.expectLoaded();
   });
 });
 

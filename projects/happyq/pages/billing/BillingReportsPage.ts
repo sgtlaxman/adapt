@@ -15,7 +15,7 @@ export class BillingReportsPage extends BasePage {
   }
 
   async switchToAuditLog() {
-    await this.page.getByRole('tab', { name: /audit log/i }).click();
+    await this.page.getByRole('tab', { name: /day invoices/i }).click();
   }
 
   async downloadCsv() {

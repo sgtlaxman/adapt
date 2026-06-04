@@ -25,7 +25,7 @@ export class AppointmentsPage extends BasePage {
   }
 
   async search(query: string) {
-    await this.page.getByPlaceholder(/search/i).fill(query);
+    await this.page.getByPlaceholder(/search by name or phone/i).fill(query);
   }
 
   async clickBookAppointment() {

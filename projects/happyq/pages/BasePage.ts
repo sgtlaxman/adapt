@@ -13,6 +13,13 @@ export class BasePage {
     return toast;
   }
 
+  async expectAccessDenied() {
+    // HappyQ's PermissionGuard shows this exact message
+    await expect(
+      this.page.getByText("You don't have permission to access this page.")
+    ).toBeVisible({ timeout: 8000 });
+  }
+
   async screenshot(name: string) {
     await this.page.screenshot({ path: `screenshots/${name}-${Date.now()}.png` });
   }

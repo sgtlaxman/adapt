@@ -11,11 +11,13 @@ export class PatientListPage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Patients' })).toBeVisible();
+    // level:1 avoids strict mode — CardTitles also contain "Patients" text
+    await expect(this.page.getByRole('heading', { name: 'Patients', level: 1 })).toBeVisible();
   }
 
   async search(query: string) {
-    await this.page.getByPlaceholder(/search/i).fill(query);
+    // Use specific placeholder to avoid matching the global search bar
+    await this.page.getByPlaceholder(/search by name, phone/i).fill(query);
   }
 
   async clickAddPatient() {

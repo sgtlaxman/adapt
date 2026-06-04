@@ -11,10 +11,10 @@ export class DocumentReportsPage extends BasePage {
   }
 
   async switchToCompletionReport() {
-    await this.page.getByRole('tab', { name: /completion report/i }).click();
+    await this.page.getByRole('tab', { name: /task completion rates/i }).click();
   }
 
   async switchToAuditLog() {
-    await this.page.getByRole('tab', { name: /audit log/i }).click();
+    await this.page.getByRole('tab', { name: /security audit trail/i }).click();
   }
 }

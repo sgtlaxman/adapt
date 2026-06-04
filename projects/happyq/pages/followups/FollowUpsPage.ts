@@ -15,7 +15,7 @@ export class FollowUpsPage extends BasePage {
   }
 
   async filterByTab(tab: 'All' | 'Scheduled' | 'Rescheduled' | 'Completed') {
-    await this.page.getByRole('tab', { name: tab }).click();
+    await this.page.getByRole('tab', { name: tab }).first().click();
   }
 
   async expectTableVisible() {
