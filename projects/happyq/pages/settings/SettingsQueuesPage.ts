@@ -7,7 +7,7 @@ export class SettingsQueuesPage extends BasePage {
   async goto() { await this.page.goto('/settings/queues'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Streamline your clinic management' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Queues' })).toBeVisible();
   }
 
   async clickNewQueue() {

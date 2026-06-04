@@ -19,6 +19,7 @@ const TEST_USERS = [
   { email: 'pons@fetalclinic.in',      role: 'STANDARD'     },
   { email: 'Ilavarasi@fetalclinic.in', role: 'ACCOUNTANT'   },
   { email: 'info@fetalclinic.in',      role: 'DOCTOR'       },
+  { email: 'preetha@fetalclinic.in',   role: 'ADMIN'        },
 ];
 
 console.log('\n[ADAPT] Setting up test users...\n');

@@ -7,7 +7,7 @@ import { SettingsServicesPage } from '../../pages/settings/SettingsServicesPage'
 import { SettingsQueuesPage } from '../../pages/settings/SettingsQueuesPage';
 import { UserEditDialog } from '../../pages/settings/dialogs/UserEditDialog';
 
-test.use({ storageState: path.resolve(__dirname, '../../.auth/standard.json') });
+test.use({ storageState: path.resolve(__dirname, '../../.auth/admin.json') });
 
 test.describe('Settings — Locations', () => {
   test('SET-E2E-001: Locations settings page loads', async ({ page }) => {

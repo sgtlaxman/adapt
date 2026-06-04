@@ -31,6 +31,11 @@ const ROLES = [
     emailKey: 'TEST_USER_ACCOUNTANT_EMAIL',
     passwordKey: 'TEST_USER_ACCOUNTANT_PASSWORD',
   },
+  {
+    role: 'admin',
+    emailKey: 'TEST_USER_ADMIN_EMAIL',
+    passwordKey: 'TEST_USER_ADMIN_PASSWORD',
+  },
 ];
 
 for (const { role, emailKey, passwordKey } of ROLES) {

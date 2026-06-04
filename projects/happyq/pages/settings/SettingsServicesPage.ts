@@ -7,7 +7,7 @@ export class SettingsServicesPage extends BasePage {
   async goto() { await this.page.goto('/settings/services'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Streamline your clinic management' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Services' })).toBeVisible();
   }
 
   async clickNewService() {

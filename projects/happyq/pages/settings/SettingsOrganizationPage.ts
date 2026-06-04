@@ -7,7 +7,7 @@ export class SettingsOrganizationPage extends BasePage {
   async goto() { await this.page.goto('/settings/organization'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Streamline your clinic management' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Organization' })).toBeVisible();
   }
 
   async fillForm(data: { name?: string; phone?: string; email?: string }) {
