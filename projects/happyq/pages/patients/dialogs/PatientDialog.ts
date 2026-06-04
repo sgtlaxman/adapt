@@ -32,9 +32,10 @@ export class PatientDialog {
     // (avoids conflicts with any page-level labels of the same name)
     const dialog = this.page.getByRole('dialog');
 
-    await dialog.getByLabel('Name').fill(data.name);
-    await dialog.getByLabel('Phone').fill(data.phone);
-    if (data.email)      await dialog.getByLabel(/email/i).fill(data.email);
+    // Use placeholder selectors — shadcn FormLabel/FormControl htmlFor wiring is unreliable with getByLabel
+    await dialog.getByPlaceholder('John Doe').fill(data.name);
+    await dialog.getByPlaceholder('98765 43210').fill(data.phone);
+    if (data.email)      await dialog.getByPlaceholder('john@example.com').fill(data.email);
     if (data.age)        await dialog.getByLabel('Age').fill(data.age);
     if (data.address)    await dialog.getByLabel(/address/i).fill(data.address);
     if (data.spouseName) await dialog.getByLabel(/spouse name/i).fill(data.spouseName);

@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import path from 'path';
 import { SettingsUsersPage } from '../../pages/settings/SettingsUsersPage';
 import { SettingsPermissionsPage } from '../../pages/settings/SettingsPermissionsPage';
