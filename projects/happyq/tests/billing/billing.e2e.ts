@@ -16,14 +16,21 @@ test.describe('Billing — Dashboard', () => {
     await billingPage.expectLoaded();
   });
 
-  test('BIL-E2E-002: Billing history page loads', async ({ page }) => {
-    const historyPage = new BillingHistoryPage(page);
-    await historyPage.goto();
-    await historyPage.expectLoaded();
+  // TFC Admin (standard) has access to billing history
+  test.describe('BIL-E2E-002 group', () => {
+    test.use({ storageState: path.resolve(__dirname, '../../.auth/standard.json') });
+    test('BIL-E2E-002: Billing history page loads', async ({ page }) => {
+      const historyPage = new BillingHistoryPage(page);
+      await historyPage.goto();
+      await historyPage.expectLoaded();
+    });
   });
 });
 
+// TFC Admin (standard) has access to outstanding balances
 test.describe('Billing — Outstanding', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/standard.json') });
+
   test('BIL-E2E-003: Outstanding balances page loads', async ({ page }) => {
     const outstandingPage = new BillingOutstandingPage(page);
     await outstandingPage.goto();

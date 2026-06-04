@@ -25,7 +25,10 @@ test.describe('Patients — List', () => {
   });
 });
 
+// Receptionist has permission to add patients
 test.describe('Patients — Add Patient', () => {
+  test.use({ storageState: path.resolve(__dirname, '../../.auth/receptionist.json') });
+
   test('PAT-E2E-003: Add Patient dialog opens', async ({ page }) => {
     const listPage = new PatientListPage(page);
     const dialog = new PatientDialog(page);
