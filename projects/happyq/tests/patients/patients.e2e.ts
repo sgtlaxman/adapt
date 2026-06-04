@@ -53,6 +53,8 @@ test.describe('Patients — Add Patient', () => {
     });
     await dialog.submit();
     await dialog.expectClosed();
+    // Search for the patient to trigger a fresh fetch — list may not auto-refresh
+    await listPage.search('John Doe');
     await listPage.expectPatientInList(tagWithRunId('John Doe', runId));
   });
 
