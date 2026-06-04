@@ -11,7 +11,7 @@ export class AppointmentHistoryPage extends BasePage {
   }
 
   async search(query: string) {
-    await this.page.getByPlaceholder(/search/i).fill(query);
+    await this.page.getByPlaceholder(/search by patient name/i).fill(query);
   }
 
   async filterByStatus(status: string) {

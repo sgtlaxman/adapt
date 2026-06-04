@@ -17,7 +17,7 @@ export class PatientListPage extends BasePage {
 
   async search(query: string) {
     // Use specific placeholder to avoid matching the global search bar
-    await this.page.getByPlaceholder(/search by name, phone/i).fill(query);
+    await this.page.getByPlaceholder(/search by name, phone, or email/i).fill(query);
   }
 
   async clickAddPatient() {

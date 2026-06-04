@@ -24,13 +24,12 @@ test.describe('Settings — Users', () => {
     await usersPage.expectLoaded();
   });
 
-  test('SET-E2E-003: New User dialog opens', async ({ page }) => {
+    test('SET-E2E-003: Invite New User form is visible', async ({ page }) => {
     const usersPage = new SettingsUsersPage(page);
-    const dialog = new UserEditDialog(page);
     await usersPage.goto();
     await usersPage.expectLoaded();
-    await usersPage.clickNewUser();
-    await dialog.expectOpen();
+    // Users page has an inline Invite New User form, not a dialog
+    await expect(page.getByText('Invite New User')).toBeVisible();
   });
 });
 
@@ -78,3 +77,4 @@ test.describe('RBA — Settings denied for Clinician', () => {
     await usersPage.expectAccessDenied();
   });
 });
+

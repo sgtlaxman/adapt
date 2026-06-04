@@ -11,15 +11,15 @@ export class ReceptionPage extends BasePage {
   }
 
   async search(query: string) {
-    await this.page.getByPlaceholder(/search/i).fill(query);
+    await this.page.getByPlaceholder(/search by name, phone, or token/i).fill(query);
   }
 
   async switchToTableView() {
-    await this.page.getByRole('button', { name: /table view/i }).click();
+    await this.page.getByRole('radio', { name: /table view/i }).click();
   }
 
   async switchToCardView() {
-    await this.page.getByRole('button', { name: /card view/i }).click();
+    await this.page.getByRole('radio', { name: /card view/i }).click();
   }
 
   async filterByQueue(queueName: string) {
