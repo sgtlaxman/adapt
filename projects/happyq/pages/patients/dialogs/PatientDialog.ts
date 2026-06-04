@@ -41,7 +41,8 @@ export class PatientDialog {
     if (data.spouseName) await dialog.getByLabel(/spouse name/i).fill(data.spouseName);
     if (data.gender) {
       await dialog.getByLabel('Gender').click();
-      await this.page.getByRole('option', { name: data.gender }).click();
+      // Use first() — option may appear in multiple listboxes
+      await this.page.getByRole('option', { name: data.gender }).first().click();
     }
   }
 
