@@ -25,6 +25,7 @@ export class PatientListPage extends BasePage {
   }
 
   async expectPatientInList(name: string) {
-    await expect(this.page.getByText(name)).toBeVisible();
+    // Wait up to 10s for the list to refresh after adding a patient
+    await expect(this.page.getByText(name)).toBeVisible({ timeout: 10000 });
   }
 }
