@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html style="scrollbar-gutter:stable both-edges" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="dark light"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ADAPT Report</title>
+  <!--
+    Option A — link to the shared CSS file:
+      <link rel="stylesheet" href="../../core/assets/playwright-theme.css">
+
+    Option B — for portable single-file reports, paste the contents of
+    playwright-theme.css inside a <style> block here instead.
+  -->
+  <link rel="stylesheet" href="../../core/assets/playwright-theme.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════════════════════ SIDEBAR ══════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="badge">DeepTree · ADAPT</div>
+      <h1><!-- Report Title --></h1>
+      <p><!-- Subtitle / date --></p>
+    </div>
+
+    <!-- Stat chips: 2-column grid -->
+    <div class="sidebar-stats">
+      <div class="stat-chip"><div class="n n-pass">0</div><div class="l">Passed</div></div>
+      <div class="stat-chip"><div class="n n-fail">0</div><div class="l">Failed</div></div>
+      <!-- Add more stat-chip divs as needed -->
+    </div>
+
+    <!-- Navigation links -->
+    <nav class="sidebar-nav">
+      <div class="nav-section">Sections</div>
+      <a class="nav-item active" href="#section1">
+        <span class="nav-dot" style="background:#4a90d9"></span> Section 1
+      </a>
+      <!-- Add more nav-item links matching section IDs below -->
+    </nav>
+  </aside>
+
+  <!-- ══════════════════════ MAIN ══════════════════════ -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="topbar-title"><!-- Page heading --></div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="topbar-meta"><!-- Meta info --></div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">
+          <span class="toggle-icon" id="toggleIcon">☀️</span>
+          <span id="toggleLabel">Light</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress bar (pass% / fail% / skip%) -->
+    <div class="progress-track">
+      <div class="progress-pass" style="width:100%"></div>
+      <!-- <div class="progress-fail" style="width:0%"></div> -->
+      <!-- <div class="progress-skip" style="width:0%"></div> -->
+    </div>
+
+    <!-- ══════════ CONTENT ══════════ -->
+    <div class="content">
+
+      <!-- ── KPI grid example ── -->
+      <!--
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-n n-pass">53</div><div class="kpi-l">Passed</div></div>
+        <div class="kpi-card"><div class="kpi-n n-fail">0</div><div class="kpi-l">Failed</div></div>
+      </div>
+      -->
+
+      <!-- ── Section ── -->
+      <section id="section1">
+        <div class="section-title">Section Title</div>
+
+        <!-- Table example -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Column A</th><th>Column B</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="test-id">ID-001</td>
+                <td class="test-name">Row description</td>
+                <td><span class="pill pill-pass">passed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pill reference:
+          <span class="pill pill-pass">passed</span>
+          <span class="pill pill-fail">failed</span>
+          <span class="pill pill-skip">skipped</span>
+          <span class="pill pill-blue">read</span>
+          <span class="pill pill-green">create</span>
+          <span class="pill pill-amber">update</span>
+          <span class="pill pill-red">delete</span>
+          <span class="pill pill-purple">adhoc</span>
+          <span class="pill pill-rose">rba</span>
+          <span class="pill pill-cyan">navigation</span>
+          <span class="pill pill-gray">neutral</span>
+        -->
+
+        <!-- Note box -->
+        <!-- <div class="note">⚠️ Note text here</div> -->
+      </section>
+
+      <!-- Add more sections as needed -->
+
+    </div><!-- /content -->
+
+    <footer>
+      ADAPT — Built by DeepTree
+    </footer>
+
+  </main>
+</div><!-- /app -->
+
+<script>
+  /* ── Theme toggle ── */
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeToggle');
+  const icon = document.getElementById('toggleIcon');
+  const lbl  = document.getElementById('toggleLabel');
+  applyTheme(localStorage.getItem('adapt-theme') || 'dark');
+  btn.addEventListener('click', () => applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  function applyTheme(t) {
+    html.setAttribute('data-theme', t);
+    localStorage.setItem('adapt-theme', t);
+    icon.textContent = t === 'light' ? '🌙' : '☀️';
+    lbl.textContent  = t === 'light' ? 'Dark' : 'Light';
+  }
+
+  /* ── Active nav on scroll ── */
+  const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) navItems.forEach(n =>
+        n.classList.toggle('active', n.getAttribute('href') === '#' + e.target.id)
+      );
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
