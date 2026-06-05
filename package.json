@@ -15,7 +15,8 @@
                     "heal:actions":         "node scripts/heal-actions.mjs",
                     "heal:dialogs":         "node scripts/heal-dialogs.mjs",
                     "generate:report":      "node scripts/generate-report.mjs",
-                    "report:happyq":        "node scripts/generate-report.mjs --project happyq --open"
+                    "report:happyq":        "node scripts/generate-report.mjs --project happyq --open",
+                    "generate:architecture": "node scripts/generate-architecture.mjs"
                 },
     "devDependencies":  {
                             "@playwright/test":  "^1.44.0",
