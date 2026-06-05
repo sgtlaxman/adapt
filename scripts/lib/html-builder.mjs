@@ -93,10 +93,18 @@ export function getBaseHtml(opts) {
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-logo">
-      ${logoHtml}
-      <div class="badge">${escHtml(badgeText)}</div>
-      <h1>${escHtml(title)}</h1>
-      <p>${escHtml(subtitle)}</p>
+      ${logoHtml
+        ? `<div style="display:flex;align-items:center;gap:12px">
+             ${logoHtml}
+             <div>
+               <h1 style="margin:0">${escHtml(title)}</h1>
+               <p style="margin:0">${escHtml(subtitle)}</p>
+             </div>
+           </div>`
+        : `${badgeText ? `<div class="badge">${escHtml(badgeText)}</div>` : ''}
+           <h1>${escHtml(title)}</h1>
+           <p>${escHtml(subtitle)}</p>`
+      }
     </div>
     <div class="sidebar-stats">${statsHtml}</div>
     <nav class="sidebar-nav">
