@@ -10,7 +10,9 @@
                     "install:browsers":  "playwright install chromium",
                     "update:testbook":  "node scripts/update-testbook.mjs",
                     "new:project":  "node scripts/new-project.mjs",
-                    "heal:selectors": "node scripts/heal-selectors.mjs"
+                    "heal:selectors": "node scripts/heal-selectors.mjs",
+                    "heal:actions":   "node scripts/heal-actions.mjs",
+                    "heal:dialogs":   "node scripts/heal-dialogs.mjs"
                 },
     "devDependencies":  {
                             "@playwright/test":  "^1.44.0",

@@ -38,7 +38,7 @@ export class PatientDialog {
     if (data.email)      await dialog.getByPlaceholder('john@example.com').fill(data.email);
     if (data.age)        await dialog.getByLabel('Age').fill(data.age);
     if (data.address)    await dialog.getByLabel(/address/i).fill(data.address);
-    if (data.spouseName) await dialog.getByLabel(/spouse name/i).fill(data.spouseName);
+    if (data.spouseName) await dialog.getByPlaceholder('Spouse name').fill(data.spouseName);
     if (data.gender) {
       await dialog.getByLabel('Gender').click();
       // Use first() — option may appear in multiple listboxes
@@ -47,11 +47,11 @@ export class PatientDialog {
   }
 
   async submit() {
-    await this.page.getByRole('dialog').getByRole('button', { name: /save patient|update patient/i }).click();
+    await this.page.getByRole('dialog').getByRole('button', { name: /save patient|update patient/i }).first().click();
   }
 
   async cancel() {
-    await this.page.getByRole('dialog').getByRole('button', { name: /cancel/i }).click();
+    await this.page.getByRole('dialog').getByRole('button', { name: /cancel/i }).first().click();
   }
 
   async expectClosed() {
