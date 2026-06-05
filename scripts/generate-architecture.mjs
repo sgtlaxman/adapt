@@ -80,7 +80,7 @@ const problemContent = `
       <tr>
         <td>Starting a new project's test suite</td>
         <td>Set up Playwright, write config, build auth, design Excel schema — hours of boilerplate</td>
-        <td>${code('npm run new:project -- --name myapp --src D:\\myapp')} — scaffolds everything in seconds</td>
+        <td>${code('npm run new:project -- --name myapp --src ~/projects/myapp')} — scaffolds everything in seconds</td>
       </tr>
       <tr>
         <td>Selector guesses from source code are wrong</td>
@@ -263,7 +263,7 @@ const scriptsContent = createScriptList([
   {
     name: 'new:project',
     description: 'Scaffolds a complete new project. With --src, auto-detects the app framework (React Router, Next.js, Vue, Angular), scans all routes and dialog components, and generates page objects + test stubs + TODO_REPORT.md.',
-    example: 'npm run new:project -- --name myapp --src D:\\myapp',
+    example: 'npm run new:project -- --name myapp --src ~/projects/myapp',
     status: 'built',
   },
   {
@@ -395,7 +395,7 @@ const newProjectContent = `
 ${createTable(
   ['Step', 'Command / Action', 'What Happens', 'Manual?'],
   [
-    ['1', code('npm run new:project -- --name myapp --src D:\\myapp'), 'Scaffolds folders, config, env, BasePage, testdata file, Excel workbook. If --src provided: auto-detects framework, scans routes + dialogs, generates page objects + test stubs + TODO_REPORT.md', createPill('Automated', 'pass')],
+    ['1', code('npm run new:project -- --name myapp --src ~/projects/myapp'), 'Scaffolds folders, config, env, BasePage, testdata file, Excel workbook. If --src provided: auto-detects framework, scans routes + dialogs, generates page objects + test stubs + TODO_REPORT.md', createPill('Automated', 'pass')],
     ['2', 'Open ' + code('projects/myapp/TODO_REPORT.md'), 'Reviews every generated selector with confidence level (✅ HIGH / ⚠️ MEDIUM / ❌ LOW)', createPill('Review', 'blue')],
     ['3', code('npx playwright codegen http://localhost:PORT/route'), 'Click elements in browser → Playwright writes real selectors → paste into page objects', createPill('Per page', 'amber')],
     ['4', code('npm run heal:selectors -- --project myapp'), 'Auto-heals all expectLoaded() heading selectors from live DOM', createPill('Automated', 'pass')],
@@ -418,10 +418,10 @@ const existingAppContent = `
 ${createTable(
   ['Step', 'Command / Action', 'Notes'],
   [
-    ['1', 'Clone the ADAPT repo alongside your app', code('git clone adapt/ D:\\adapt')],
-    ['2', code('cd D:\\adapt && npm install && npm run install:browsers'), 'Install dependencies + Playwright Chromium once per machine'],
-    ['3', code('npm run new:project -- --name myapp --src D:\\myapp'), 'Source scanner detects framework, generates page objects from your existing routes and components'],
-    ['4', 'Start the app: ' + code('cd D:\\myapp && npm run dev'), 'The app must be running for heal scripts to work'],
+    ['1', 'Clone the ADAPT repo alongside your app', code('git clone adapt/ ~/projects/adapt')],
+    ['2', code('cd ~/projects/adapt && npm install && npm run install:browsers'), 'Install dependencies + Playwright Chromium once per machine'],
+    ['3', code('npm run new:project -- --name myapp --src ~/projects/myapp'), 'Source scanner detects framework, generates page objects from your existing routes and components'],
+    ['4', 'Start the app: ' + code('cd ~/projects/myapp && npm run dev'), 'The app must be running for heal scripts to work'],
     ['5', code('npm run heal:selectors -- --project myapp'), 'Fix all heading selectors — most will be auto-healed'],
     ['6', code('npm run heal:actions -- --project myapp'), 'Fix action method selectors'],
     ['7', code('npm run heal:dialogs -- --project myapp'), 'Fix dialog selectors for dialogs referenced in test files'],
@@ -469,7 +469,7 @@ ${createTable(
 <div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:4px;padding:16px 20px;font-family:var(--font-mono);font-size:12px;line-height:2;color:var(--color-text-muted)">
 <span style="color:var(--color-text-dim)"># Adding a second project takes under 5 minutes:</span>
 <br>
-<span style="color:var(--color-accent)">npm run new:project</span> -- --name <span style="color:var(--color-pass)">onlinebooking</span> --src D:\\onlinebooking
+<span style="color:var(--color-accent)">npm run new:project</span> -- --name <span style="color:var(--color-pass)">onlinebooking</span> --src ~/projects/onlinebooking
 <br><span style="color:var(--color-text-dim)"># → Detects React Router, scans 20 routes, generates 20 page objects, creates Excel</span>
 <br><br>
 <span style="color:var(--color-accent)">npm run heal:selectors</span> -- --project <span style="color:var(--color-pass)">onlinebooking</span>

@@ -11,8 +11,29 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_URL    = 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
+const __dirname  = path.dirname(fileURLToPath(import.meta.url));
+
+// ─── Resolve DB URL ───────────────────────────────────────────────────────────
+// Priority: SUPABASE_DB_URL env var → project .env.local → local Supabase default
+
+function resolveDbUrl() {
+  // 1. Explicit env override
+  if (process.env.SUPABASE_DB_URL) return process.env.SUPABASE_DB_URL;
+
+  // 2. Read from project .env.local (project passed via --project flag or default to happyq)
+  const projectArg = process.argv.indexOf('--project');
+  const project    = projectArg !== -1 ? process.argv[projectArg + 1] : 'happyq';
+  const envFile    = path.resolve(__dirname, '..', 'projects', project, '.env.local');
+  if (fs.existsSync(envFile)) {
+    const match = fs.readFileSync(envFile, 'utf-8').match(/^SUPABASE_DB_URL=(.+)$/m);
+    if (match) return match[1].trim();
+  }
+
+  // 3. Default local Supabase — cross-platform localhost
+  return 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
+}
+
+const DB_URL = resolveDbUrl();
 
 const TEST_USERS = [
   { email: 'julie@fetalclinic.in',     role: 'RECEPTIONIST' },

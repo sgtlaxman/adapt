@@ -17,7 +17,9 @@
                     "generate:report":      "node scripts/generate-report.mjs",
                     "report:happyq":        "node scripts/generate-report.mjs --project happyq --open",
                     "generate:architecture": "node scripts/generate-architecture.mjs",
-                    "serve:docs":            "npx serve . --listen 4000 --no-clipboard"
+                    "serve:docs":            "npx serve . --listen 4000 --no-clipboard",
+                    "check":                 "node scripts/check-prereqs.mjs",
+                    "check:happyq":          "node scripts/check-prereqs.mjs --project happyq"
                 },
     "devDependencies":  {
                             "@playwright/test":  "^1.44.0",
