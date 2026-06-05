@@ -288,9 +288,31 @@ npm run update:testbook -- --project <name>   # update Excel after adding test r
 After generating page objects (via `new:project --src` or manually), selectors are educated guesses.
 **Always run `heal:selectors` to fix `expectLoaded()` headings before running tests.**
 
+### Three Heal Scripts — Full Coverage
+
+| Script | Heals | How |
+|--------|-------|-----|
+| `heal:selectors` | `expectLoaded()` headings | Navigates page, extracts h1/h2 from DOM |
+| `heal:actions` | Button/tab/radio/placeholder selectors in action methods | Navigates page, extracts all interactive elements, fuzzy-matches |
+| `heal:dialogs` | Dialog `fill()`, `submit()`, `cancel()` selectors | Auto-detects trigger from test files, opens dialog, extracts live fields |
+
 ### Usage
 
 ```bash
+# Heal heading selectors
+npm run heal:selectors -- --project happyq
+
+# Heal action method selectors (buttons, tabs, search placeholders)
+npm run heal:actions -- --project happyq
+npm run heal:actions -- --project happyq --role receptionist --module reception
+
+# Heal dialog fill/submit/cancel selectors
+npm run heal:dialogs -- --project happyq --role receptionist
+npm run heal:dialogs -- --project happyq --dialog PatientDialog
+
+# Run all three in sequence (full heal)
+npm run heal:selectors -- --project happyq && npm run heal:actions -- --project happyq && npm run heal:dialogs -- --project happyq
+
 # Heal all modules with standard role (default)
 npm run heal:selectors -- --project happyq
 
