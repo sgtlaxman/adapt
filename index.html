@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html data-theme="dark" style="scrollbar-gutter:stable both-edges">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="dark light"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ADAPT — DeepTree</title>
+  <style>
+    /* Inline minimal Prism theme for this index page */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root,[data-theme="dark"]{--bg:#1a1a1a;--bg2:#242424;--border:#3a3a3a;--text:#e4e4e4;--muted:#888;--dim:#555;--accent:#4a90d9;--pass:#4caf50;--amber:#ff9800;--purple:#9c6ef5;--cyan:#4dd0e1;--toggle:#333}
+    [data-theme="light"]{--bg:#f5f5f5;--bg2:#fff;--border:#e0e0e0;--text:#1a1a1a;--muted:#555;--dim:#999;--accent:#1565c0;--pass:#2e7d32;--amber:#e65100;--purple:#5e35b1;--cyan:#00838f;--toggle:#ddd}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.6}
+    header{background:var(--bg2);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand svg{flex-shrink:0}
+    .brand-text h1{font-size:16px;font-weight:700;color:var(--text)}
+    .brand-text p{font-size:11px;color:var(--muted)}
+    .toggle-btn{background:var(--toggle);border:1px solid var(--border);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px}
+    .toggle-btn:hover{color:var(--text)}
+    main{max-width:960px;margin:0 auto;padding:40px 24px}
+    .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:36px}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px 18px;text-decoration:none;display:block;transition:border-color .15s,background .15s}
+    .card:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 5%,var(--bg2))}
+    .card-icon{font-size:20px;margin-bottom:8px}
+    .card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .card-desc{font-size:11px;color:var(--muted);line-height:1.5}
+    .card-tag{display:inline-block;margin-top:8px;font-size:10px;font-weight:600;padding:1px 8px;border-radius:99px}
+    .tag-blue  {background:rgba(74,144,217,.12);color:var(--accent)}
+    .tag-green {background:rgba(76,175,80,.12);color:var(--pass)}
+    .tag-amber {background:rgba(255,152,0,.12);color:var(--amber)}
+    .tag-purple{background:rgba(156,110,245,.12);color:var(--purple)}
+    .tag-cyan  {background:rgba(77,208,225,.12);color:var(--cyan)}
+    .progress-bar{height:3px;background:var(--border);display:flex;overflow:hidden;margin-bottom:32px;border-radius:2px}
+    .pb-pass{background:var(--pass)}
+    .pb-skip{background:var(--amber)}
+    footer{text-align:center;padding:24px;font-size:11px;color:var(--dim);border-top:1px solid var(--border);margin-top:20px}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg width="36" height="34" viewBox="0 0 434 414" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M214.988 17.6185C173.186 17.6847 131.384 17.7528 89.5828 17.8164C72.761 17.842 55.9371 18.0228 39.118 17.8192C28.0125 17.6848 16.6871 27.4934 16.7172 40.2883C16.9757 150.379 16.8445 260.471 16.8764 370.562C16.8803 383.731 25.1628 393.369 38.3161 394.145C52.5912 394.986 66.9382 394.611 81.254 394.757C94.2308 394.89 107.208 395.011 120.679 395.673C121.185 401.371 121.195 406.534 121.206 411.696C92.559 411.752 63.9072 412.131 35.2662 411.733C19.7161 411.516 3.5297 395.656 1.08442 379.445C0.441659 375.184 0.0591833 370.839 0.0568023 366.532C-0.00346975 257.592 -0.00594249 148.653 0.00516651 39.7135C0.00742451 17.3136 16.9164 0.1035 39.4116 0.0575265C97.2123 -0.0605925 155.014 0.0371097 212.815 0.0535897C213.313 0.0537267 213.811 0.123231 214.756 0.675767C215.131 6.66693 215.059 12.1427 214.988 17.6185Z" fill="#3D93F1"/>
+      <path d="M329.413 299.062C330.203 295.07 331.655 291.082 331.676 287.086C331.819 259.929 331.589 232.771 331.662 205.613C331.675 200.476 330.338 196.436 326.542 192.729C309.99 176.567 293.636 160.201 277.289 143.83C273.788 140.323 269.958 138.793 264.859 138.822C230.371 139.019 195.881 139.001 161.393 138.834C156.713 138.811 154.067 139.853 152.027 144.58C146.543 157.287 132.356 163.829 118.425 160.868C105.983 158.224 94.4692 145.629 94.7456 131.815C95.0683 115.686 103.861 103.878 119.324 100.54C133.362 97.5093 147.51 105.268 153.325 119.574C154.678 122.903 156.838 122.965 159.601 122.961C194.423 122.904 229.25 123.197 264.065 122.671C274.943 122.506 282.936 125.874 290.424 133.772C306.333 150.551 322.958 166.662 339.561 182.767C345.096 188.136 347.83 194.172 347.816 201.785C347.758 232.775 348.003 263.767 347.574 294.751C347.516 298.925 344.25 303.055 341.891 307.211C337.347 304.499 333.38 301.78 329.413 299.062Z" fill="#F13B3C"/>
+      <path d="M215.449 17.6822C215.059 12.1427 215.131 6.66693 215.241 0.748625C225.43 0.212477 235.582 0.0464307 245.734 0.0386637C278.7 0.0133947 311.666 0.10948 344.631 0.0111216C352.689 -0.0129114 359.578 2.16739 365.387 7.99882C385.927 28.6206 406.587 49.1228 427.21 69.662C431.425 73.8602 433.714 78.9729 433.721 84.8549C433.78 129.973 433.738 175.091 433.218 220.645C427.908 221.004 423.107 220.927 418.305 220.849C418.182 217.193 417.955 213.537 417.952 209.88C417.916 170.584 417.854 131.287 417.978 91.9906C417.995 86.6064 416.346 82.4973 412.491 78.7217C394.065 60.6781 375.731 42.539 357.56 24.239C353.065 19.7111 348.416 17.6525 341.79 17.6978C299.832 17.9847 257.871 17.785 215.449 17.6822Z" fill="#F1393C"/>
+      <path d="M121.649 411.777C121.195 406.534 121.185 401.371 121.082 395.777C121.188 392.871 121.556 390.398 121.556 387.924C121.554 370.926 121.581 353.927 121.374 336.931C121.276 328.814 123.772 322.126 129.657 316.325C147.679 298.562 165.43 280.523 183.361 262.667C186.231 259.81 187.674 257.381 186.349 252.788C182.456 239.295 189.867 224.989 202.961 219.118C216.361 213.11 232.079 217.792 240.874 230.412C248.399 241.209 246.742 257.645 237.166 267.185C225.763 278.546 212.959 279.941 197.696 271.206C185.588 283.361 173.377 295.59 161.203 307.857C154.876 314.233 148.721 320.783 142.279 327.04C139.159 330.071 137.992 333.458 138.013 337.726C138.125 360.557 138.073 383.389 138.078 406.221C138.078 408.012 138.078 409.803 138.078 411.858C132.383 411.858 127.237 411.858 121.649 411.777Z" fill="#F5B92B"/>
+      <path d="M329.184 299.243C333.38 301.78 337.347 304.499 341.608 307.443C329.112 320.506 316.365 333.387 303.514 346.162C294.667 354.958 285.586 363.522 276.839 372.414C275.494 373.781 274.648 376.426 274.817 378.371C276.305 395.451 266.328 409.504 249.94 412.986C234.742 416.215 217.973 405.118 214.465 389.51C210.723 372.863 220.55 356.8 236.721 353.13C247.027 350.791 251.979 352.023 266.443 360.661C287.225 340.303 308.09 319.863 329.184 299.243Z" fill="#4CA868"/>
+      <path d="M418.229 221.319C423.107 220.927 427.908 221.004 433.149 221.124C433.619 259.47 433.647 297.774 433.68 336.078C433.69 347.403 433.051 358.777 433.877 370.043C435.358 390.232 412.016 413.481 392.246 412.368C389.971 412.24 387.683 412.351 383.982 412.351C391.3 405.486 397.823 399.742 403.897 393.557C409.168 388.188 415.976 383.834 417.48 375.606C417.865 373.5 418.026 371.325 418.029 369.181C418.092 320.05 418.119 270.919 418.229 221.319Z" fill="#49A568"/>
+    </svg>
+    <div class="brand-text">
+      <h1>ADAPT</h1>
+      <p>Automated Data-driven Playwright Testing · by deeptree.in</p>
+    </div>
+  </div>
+  <button class="toggle-btn" id="toggleBtn">
+    <span id="toggleIcon">☀️</span><span id="toggleLabel">Light</span>
+  </button>
+</header>
+
+<main>
+
+  <!-- Progress bar: 53/56 tests -->
+  <div class="progress-bar" style="margin-top:0;margin-bottom:28px">
+    <div class="pb-pass" style="width:94.6%"></div>
+    <div class="pb-skip" style="width:5.4%"></div>
+  </div>
+
+  <!-- Framework docs -->
+  <div class="section-label">Framework Documentation</div>
+  <div class="card-grid">
+    <a class="card" href="docs/adapt-architecture.html">
+      <div class="card-icon">🏗️</div>
+      <div class="card-title">ADAPT Architecture</div>
+      <div class="card-desc">Full architecture, design principles, features, plug-and-play guide, new + existing app workflows, Prism design system, and roadmap.</div>
+      <span class="card-tag tag-blue">Architecture</span>
+    </a>
+    <a class="card" href="DEVELOPMENT.md">
+      <div class="card-icon">📖</div>
+      <div class="card-title">Developer Guide</div>
+      <div class="card-desc">All commands, selector verification with codegen, debugging failing tests, CI setup, and day-to-day workflows.</div>
+      <span class="card-tag tag-cyan">Reference</span>
+    </a>
+    <a class="card" href="CONVENTIONS.md">
+      <div class="card-icon">📐</div>
+      <div class="card-title">Conventions</div>
+      <div class="card-desc">Page object rules, dialog class rules, test file structure, Excel schema, and the storageState naming convention.</div>
+      <span class="card-tag tag-purple">Conventions</span>
+    </a>
+  </div>
+
+  <!-- HappyQ project -->
+  <div class="section-label">HappyQ Project</div>
+  <div class="card-grid">
+    <a class="card" href="projects/happyq/reports/report-latest.html">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Latest Test Report</div>
+      <div class="card-desc">Most recent Playwright test run — 53 passed · 0 failed · 3 skipped. Auto-regenerated after every run.</div>
+      <span class="card-tag tag-green">53 / 56 passing</span>
+    </a>
+    <a class="card" href="projects/happyq/docs/adapt-summary.html">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">HappyQ Test Journey</div>
+      <div class="card-desc">The full test automation journey — what was built, healing tasks, E2E test inventory, and design system docs.</div>
+      <span class="card-tag tag-amber">Journey Summary</span>
+    </a>
+    <a class="card" href="projects/happyq/data/HappyQ_Tests.xlsx" download>
+      <div class="card-icon">📋</div>
+      <div class="card-title">HappyQ Testbook</div>
+      <div class="card-desc">Excel workbook — TEST_CONTROL (run flags), E2E_TESTS (52 cases), TEST_USERS (5 roles), RESULTS (history).</div>
+      <span class="card-tag tag-green">Download</span>
+    </a>
+  </div>
+
+  <!-- Quick commands -->
+  <div class="section-label">Quick Commands</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:16px 20px;font-family:'Menlo','Consolas',monospace;font-size:11px;line-height:2.2;color:var(--muted)">
+    <div><span style="color:var(--dim)"># Run tests</span></div>
+    <div><span style="color:var(--accent)">npm run test:happyq</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--dim)"># runs suite + auto-generates report</span></div>
+    <div><span style="color:var(--accent)">npm run test:happyq:headed</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--dim)"># watch the browser</span></div>
+    <div>&nbsp;</div>
+    <div><span style="color:var(--dim)"># Heal selectors after adding new pages</span></div>
+    <div><span style="color:var(--pass)">npm run heal:selectors</span> -- --project happyq &nbsp;<span style="color:var(--dim)"># fix headings</span></div>
+    <div><span style="color:var(--pass)">npm run heal:actions</span> &nbsp; -- --project happyq &nbsp;<span style="color:var(--dim)"># fix buttons/tabs</span></div>
+    <div><span style="color:var(--pass)">npm run heal:dialogs</span> &nbsp; -- --project happyq &nbsp;<span style="color:var(--dim)"># fix dialog fields</span></div>
+    <div>&nbsp;</div>
+    <div><span style="color:var(--dim)"># New project</span></div>
+    <div><span style="color:var(--amber)">npm run new:project</span> -- --name myapp --src D:\myapp</div>
+    <div>&nbsp;</div>
+    <div><span style="color:var(--dim)"># Regenerate docs</span></div>
+    <div><span style="color:var(--purple)">npm run generate:architecture</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--dim)"># rebuild this architecture doc</span></div>
+    <div><span style="color:var(--purple)">npm run report:happyq</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--dim)"># rebuild test report + open</span></div>
+    <div><span style="color:var(--cyan)">npm run serve:docs</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--dim)"># serve this site at localhost:4000</span></div>
+  </div>
+
+</main>
+
+<footer>
+  ADAPT — Automated Data-driven Playwright Testing &nbsp;·&nbsp; Built by deeptree.in
+</footer>
+
+<script>
+  const h = document.documentElement;
+  const b = document.getElementById('toggleBtn');
+  const i = document.getElementById('toggleIcon');
+  const l = document.getElementById('toggleLabel');
+  function t(theme) {
+    h.setAttribute('data-theme', theme);
+    localStorage.setItem('adapt-theme', theme);
+    i.textContent = theme === 'light' ? '🌙' : '☀️';
+    l.textContent = theme === 'light' ? 'Dark' : 'Light';
+  }
+  t(localStorage.getItem('adapt-theme') || 'dark');
+  b.addEventListener('click', () => t(h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+</script>
+</body>
+</html>

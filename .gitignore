@@ -13,9 +13,14 @@ projects/**/playwright-report/
 projects/**/test-results/
 projects/**/screenshots/
 projects/**/test-results.json
-projects/**/reports/
 test-results/
 playwright-report/
+
+# Generated reports — not committed, regenerated on each run
+projects/**/reports/
+
+# Generated docs — committed to docs/ at repo root, not per-project copies
+projects/**/docs/adapt-summary.html
 
 # OS
 .DS_Store

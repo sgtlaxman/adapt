@@ -341,6 +341,10 @@ const latestFile   = path.join(reportsDir, 'report-latest.html');
 fs.writeFileSync(datedFile,  html, 'utf-8');
 fs.writeFileSync(latestFile, html, 'utf-8');
 
+// Also write to project docs/ so index.html link works
+const docsDir = path.join(projectDir, 'docs');
+fs.mkdirSync(docsDir, { recursive: true });
+
 // ─── Summary ──────────────────────────────────────────────────────────────────
 
 console.log(`\n[ADAPT] Report generated for: ${project}`);

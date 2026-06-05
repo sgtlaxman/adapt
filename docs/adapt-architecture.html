@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html style="scrollbar-gutter:stable both-edges" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="color-scheme" content="dark light"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>ADAPT Architecture</title>
+  <style>/**
+ * playwright-theme.css
+ * ADAPT Design System — Playwright-style dark/light theme.
+ *
+ * Usage in any HTML file:
+ *   <link rel="stylesheet" href="path/to/playwright-theme.css">
+ *   <html data-theme="dark">  ← or "light"
+ *
+ * Switches instantly via:
+ *   document.documentElement.setAttribute('data-theme', 'light')
+ */
+
+/* ── Reset ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark theme (default) ────────────────────────────────────────── */
+:root, [data-theme="dark"] {
+  --color-bg:           #1a1a1a;
+  --color-bg-secondary: #242424;
+  --color-bg-hover:     #2a2a2a;
+  --color-border:       #3a3a3a;
+  --color-text:         #e4e4e4;
+  --color-text-muted:   #888;
+  --color-text-dim:     #666;
+  --color-accent:       #4a90d9;
+  --color-pass:         #4caf50;
+  --color-fail:         #f44336;
+  --color-skip:         #ff9800;
+  --color-pass-bg:      rgba(76,175,80,.15);
+  --color-fail-bg:      rgba(244,67,54,.15);
+  --color-skip-bg:      rgba(255,152,0,.15);
+  --toggle-bg:          #333;
+}
+
+/* ── Light theme ─────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --color-bg:           #f5f5f5;
+  --color-bg-secondary: #ffffff;
+  --color-bg-hover:     #f0f0f0;
+  --color-border:       #e0e0e0;
+  --color-text:         #1a1a1a;
+  --color-text-muted:   #555;
+  --color-text-dim:     #888;
+  --color-accent:       #1565c0;
+  --color-pass:         #2e7d32;
+  --color-fail:         #c62828;
+  --color-skip:         #e65100;
+  --color-pass-bg:      rgba(46,125,50,.1);
+  --color-fail-bg:      rgba(198,40,40,.1);
+  --color-skip-bg:      rgba(230,81,0,.1);
+  --toggle-bg:          #ddd;
+}
+
+/* ── Shared tokens ───────────────────────────────────────────────── */
+:root {
+  --font-mono:     'Menlo','Consolas','Liberation Mono',monospace;
+  --font-sans:     -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --sidebar-width: 280px;
+  --radius:        4px;
+}
+
+/* ── Base ────────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+a    { color: var(--color-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: var(--font-mono); font-size: .9em; color: #b5cea8; }
+[data-theme="light"] code { color: #1a6b3c; }
+
+/* ── App shell ───────────────────────────────────────────────────── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ─────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  overflow-y: auto; z-index: 10;
+}
+[data-theme="light"] .sidebar { box-shadow: 2px 0 8px rgba(0,0,0,.08); }
+
+.sidebar-logo {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.sidebar-logo svg { display: block; max-width: 100%; }
+.sidebar-logo .badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--color-accent);
+  background: rgba(74,144,217,.15);
+  border: 1px solid rgba(74,144,217,.3);
+  padding: 2px 8px; border-radius: 99px;
+  display: inline-block; margin-bottom: 8px;
+}
+.sidebar-logo h1 { font-size: 15px; font-weight: 700; color: var(--color-text); }
+.sidebar-logo p  { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+
+.sidebar-stats {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.stat-chip {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 8px 10px; text-align: center;
+}
+.stat-chip .n { font-size: 20px; font-weight: 800; font-family: var(--font-mono); }
+.stat-chip .l { font-size: 10px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; }
+
+.sidebar-nav { padding: 8px 0; }
+.nav-section {
+  font-size: 10px; font-weight: 700; color: var(--color-text-dim);
+  text-transform: uppercase; letter-spacing: .1em;
+  padding: 12px 16px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px; cursor: pointer;
+  color: var(--color-text-muted); font-size: 12px;
+  text-decoration: none;
+  transition: background .1s, color .1s;
+}
+.nav-item:hover  { background: var(--color-bg-hover); color: var(--color-text); text-decoration: none; }
+.nav-item.active { background: rgba(74,144,217,.12); color: var(--color-accent); border-right: 2px solid var(--color-accent); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Main ────────────────────────────────────────────────────────── */
+.main { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Topbar ──────────────────────────────────────────────────────── */
+.topbar {
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 5;
+}
+.topbar-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+.topbar-meta  { font-size: 11px; color: var(--color-text-muted); }
+
+/* ── Progress bar ────────────────────────────────────────────────── */
+.progress-track { height: 3px; background: var(--color-border); display: flex; overflow: hidden; }
+[data-theme="light"] .progress-track { background: #e0e0e0; }
+.progress-pass  { background: var(--color-pass); }
+.progress-fail  { background: var(--color-fail); }
+.progress-skip  { background: var(--color-skip); }
+
+/* ── Content ─────────────────────────────────────────────────────── */
+.content { padding: 24px; }
+section  { margin-bottom: 36px; }
+
+.section-title {
+  font-size: 11px; font-weight: 700; color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: .1em;
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--color-border); }
+table { width: 100%; border-collapse: collapse; background: var(--color-bg-secondary); }
+thead tr { border-bottom: 1px solid var(--color-border); }
+th {
+  padding: 9px 14px; text-align: left;
+  font-size: 11px; font-weight: 600; color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: .07em;
+  background: var(--color-bg); white-space: nowrap;
+}
+td { padding: 9px 14px; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 12px; vertical-align: top; }
+[data-theme="light"] td { border-bottom: 1px solid var(--color-border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-bg-hover); }
+.test-id   { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
+.test-name { font-size: 12px; color: var(--color-text); }
+.test-assertion { font-size: 11px; color: var(--color-text-dim); font-style: italic; }
+.test-role { font-family: var(--font-mono); font-size: 10px; }
+
+/* ── Pills / badges ──────────────────────────────────────────────── */
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 99px;
+  font-size: 11px; font-weight: 600; letter-spacing: .03em; white-space: nowrap;
+}
+.pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pill-pass  { color: var(--color-pass); background: var(--color-pass-bg); }
+.pill-fail  { color: var(--color-fail); background: var(--color-fail-bg); }
+.pill-skip  { color: var(--color-skip); background: var(--color-skip-bg); }
+.pill-blue  { color: var(--color-accent); background: rgba(74,144,217,.12); }
+.pill-gray  { color: var(--color-text-muted); background: rgba(255,255,255,.06); }
+.pill-green { color: #4caf50; background: rgba(76,175,80,.1); }
+.pill-amber { color: #ff9800; background: rgba(255,152,0,.1); }
+.pill-red   { color: #f44336; background: rgba(244,67,54,.1); }
+.pill-purple{ color: #9c6ef5; background: rgba(156,110,245,.1); }
+.pill-rose  { color: #e879a0; background: rgba(232,121,160,.1); }
+.pill-cyan  { color: #4dd0e1; background: rgba(77,208,225,.1); }
+/* Light theme pill overrides */
+[data-theme="light"] .pill-pass  { color: #2e7d32; background: rgba(46,125,50,.1); }
+[data-theme="light"] .pill-fail  { color: #c62828; background: rgba(198,40,40,.1); }
+[data-theme="light"] .pill-skip  { color: #e65100; background: rgba(230,81,0,.1); }
+[data-theme="light"] .pill-blue  { color: #1565c0; background: rgba(21,101,192,.1); }
+[data-theme="light"] .pill-gray  { color: #555;    background: rgba(0,0,0,.06); }
+[data-theme="light"] .pill-green { color: #2e7d32; background: rgba(46,125,50,.08); }
+[data-theme="light"] .pill-amber { color: #e65100; background: rgba(230,81,0,.08); }
+[data-theme="light"] .pill-red   { color: #c62828; background: rgba(198,40,40,.08); }
+[data-theme="light"] .pill-purple{ color: #5e35b1; background: rgba(94,53,177,.08); }
+[data-theme="light"] .pill-rose  { color: #ad1457; background: rgba(173,20,87,.08); }
+[data-theme="light"] .pill-cyan  { color: #00838f; background: rgba(0,131,143,.08); }
+
+/* ── KPI / stat grid ─────────────────────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 20px; }
+.kpi-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius); padding: 14px 12px; text-align: center;
+}
+.kpi-n { font-size: 22px; font-weight: 800; font-family: var(--font-mono); }
+.kpi-l { font-size: 10px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+/* ── Colour helpers ──────────────────────────────────────────────── */
+.n-pass   { color: var(--color-pass); }
+.n-fail   { color: var(--color-fail); }
+.n-skip   { color: var(--color-skip); }
+.n-blue   { color: var(--color-accent); }
+.n-purple { color: #9c6ef5; }
+[data-theme="light"] .n-purple { color: #5e35b1; }
+
+/* ── Run timeline rows ───────────────────────────────────────────── */
+.run-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+.run-row:last-child { border-bottom: none; }
+.run-row:first-child { border-radius: var(--radius) var(--radius) 0 0; }
+.run-bar-wrap { flex: 1; display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--color-border); gap: 1px; }
+.run-bar  { height: 100%; }
+.run-label { font-size: 11px; color: var(--color-text-muted); width: 70px; flex-shrink: 0; }
+.run-nums  { font-size: 11px; color: var(--color-text-muted); white-space: nowrap; width: 160px; text-align: right; flex-shrink: 0; }
+.run-desc  { font-size: 11px; color: var(--color-text-dim); flex: 1; text-align: right; }
+
+/* ── Script list ─────────────────────────────────────────────────── */
+.script-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; }
+.script-item { background: var(--color-bg-secondary); padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.script-item:hover { background: var(--color-bg-hover); }
+.script-cmd-name { font-family: var(--font-mono); font-size: 12px; color: var(--color-accent); flex-shrink: 0; width: 130px; }
+.script-body { flex: 1; }
+.script-desc    { font-size: 12px; color: var(--color-text-muted); }
+.script-example { font-family: var(--font-mono); font-size: 11px; color: #b5cea8; margin-top: 4px; }
+[data-theme="light"] .script-example { color: #1a6b3c; }
+.script-status { flex-shrink: 0; }
+
+/* ── Note box ────────────────────────────────────────────────────── */
+.note {
+  border: 1px solid rgba(255,152,0,.3); background: rgba(255,152,0,.06);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 12px; color: #ffa726; margin-top: 12px;
+}
+[data-theme="light"] .note { border-color: rgba(230,81,0,.3); background: rgba(230,81,0,.05); color: #bf360c; }
+
+/* ── Theme toggle button ─────────────────────────────────────────── */
+.theme-toggle {
+  background: var(--toggle-bg); border: 1px solid var(--color-border);
+  border-radius: 99px; padding: 4px 12px;
+  font-size: 12px; color: var(--color-text-muted);
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background .15s, color .15s; user-select: none; flex-shrink: 0;
+}
+.theme-toggle:hover { color: var(--color-text); background: var(--color-bg-hover); }
+.theme-toggle .toggle-icon { font-size: 13px; line-height: 1; }
+
+/* ── Folder tree ─────────────────────────────────────────────────── */
+.folder-tree {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1;
+}
+.tree-row {
+  display: flex; align-items: center;
+  padding: 4px 16px; white-space: nowrap;
+  cursor: default; transition: background .1s;
+}
+.tree-row:hover { background: var(--color-bg-hover); }
+.tree-clickable { cursor: pointer; }
+.tree-spacer    { display: inline-block; width: 16px; flex-shrink: 0; color: transparent; }
+.tree-connector { color: var(--color-border); flex-shrink: 0; width: 20px; }
+.tree-toggle    { flex-shrink: 0; width: 14px; color: var(--color-text-dim); font-size: 10px; margin-right: 2px; }
+.tree-icon      { flex-shrink: 0; margin-right: 6px; font-size: 12px; line-height: 1; }
+.tree-label     { flex-shrink: 0; }
+.tree-desc      { font-family: var(--font-sans); font-size: 11px; color: var(--color-text-dim); margin-left: 10px; }
+.tree-children.collapsed { display: none; }
+/* name colours */
+.tc-root    { color: var(--color-accent); font-weight: 700; }
+.tc-core    { color: var(--color-accent); }
+.tc-projects{ color: #ff9800; }
+.tc-scripts { color: #4dd0e1; }
+.tc-assets  { color: #9c6ef5; }
+.tc-pass    { color: var(--color-pass); }
+.tc-purple  { color: #9c6ef5; }
+.tc-amber   { color: #ff9800; }
+.tc-muted   { color: var(--color-text-muted); }
+[data-theme="light"] .tree-connector { color: #ddd; }
+[data-theme="light"] .tree-desc      { color: #aaa; }
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+footer { padding: 20px 24px; border-top: 1px solid var(--color-border); font-size: 11px; color: var(--color-text-dim); }
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="display:flex;align-items:center;gap:12px">
+             <svg width="52" height="50" viewBox="0 0 434 414" style="flex-shrink:0" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-bottom:12px">
+<path d="M214.988 17.6185C173.186 17.6847 131.384 17.7528 89.5828 17.8164C72.761 17.842 55.9371 18.0228 39.118 17.8192C28.0125 17.6848 16.6871 27.4934 16.7172 40.2883C16.9757 150.379 16.8445 260.471 16.8764 370.562C16.8803 383.731 25.1628 393.369 38.3161 394.145C52.5912 394.986 66.9382 394.611 81.254 394.757C94.2308 394.89 107.208 395.011 120.679 395.673C121.185 401.371 121.195 406.534 121.206 411.696C92.559 411.752 63.9072 412.131 35.2662 411.733C19.7161 411.516 3.5297 395.656 1.08442 379.445C0.441659 375.184 0.0591833 370.839 0.0568023 366.532C-0.00346975 257.592 -0.00594249 148.653 0.00516651 39.7135C0.00742451 17.3136 16.9164 0.1035 39.4116 0.0575265C97.2123 -0.0605925 155.014 0.0371097 212.815 0.0535897C213.313 0.0537267 213.811 0.123231 214.756 0.675767C215.131 6.66693 215.059 12.1427 214.988 17.6185Z" fill="#3D93F1"/>
+<path d="M329.413 299.062C330.203 295.07 331.655 291.082 331.676 287.086C331.819 259.929 331.589 232.771 331.662 205.613C331.675 200.476 330.338 196.436 326.542 192.729C309.99 176.567 293.636 160.201 277.289 143.83C273.788 140.323 269.958 138.793 264.859 138.822C230.371 139.019 195.881 139.001 161.393 138.834C156.713 138.811 154.067 139.853 152.027 144.58C146.543 157.287 132.356 163.829 118.425 160.868C105.983 158.224 94.4692 145.629 94.7456 131.815C95.0683 115.686 103.861 103.878 119.324 100.54C133.362 97.5093 147.51 105.268 153.325 119.574C154.678 122.903 156.838 122.965 159.601 122.961C194.423 122.904 229.25 123.197 264.065 122.671C274.943 122.506 282.936 125.874 290.424 133.772C306.333 150.551 322.958 166.662 339.561 182.767C345.096 188.136 347.83 194.172 347.816 201.785C347.758 232.775 348.003 263.767 347.574 294.751C347.516 298.925 344.25 303.055 341.891 307.211C337.347 304.499 333.38 301.78 329.413 299.062ZM139.965 128.786C138.081 120.825 133.219 116.26 126.243 115.901C118.906 115.524 113.276 119.041 111.146 125.573C109.26 131.357 109.77 136.744 114.479 141.173C119.135 145.552 124.506 147.195 130.512 144.581C136.912 141.794 140.243 136.775 139.965 128.786Z" fill="#F13B3C"/>
+<path d="M215.449 17.6822C215.059 12.1427 215.131 6.66693 215.241 0.748625C225.43 0.212477 235.582 0.0464307 245.734 0.0386637C278.7 0.0133947 311.666 0.10948 344.631 0.0111216C352.689 -0.0129114 359.578 2.16739 365.387 7.99882C385.927 28.6206 406.587 49.1228 427.21 69.662C431.425 73.8602 433.714 78.9729 433.721 84.8549C433.78 129.973 433.738 175.091 433.218 220.645C427.908 221.004 423.107 220.927 418.305 220.849C418.182 217.193 417.955 213.537 417.952 209.88C417.916 170.584 417.854 131.287 417.978 91.9906C417.995 86.6064 416.346 82.4973 412.491 78.7217C394.065 60.6781 375.731 42.539 357.56 24.239C353.065 19.7111 348.416 17.6525 341.79 17.6978C299.832 17.9847 257.871 17.785 215.449 17.6822Z" fill="#F1393C"/>
+<path d="M121.649 411.777C121.195 406.534 121.185 401.371 121.082 395.777C121.188 392.871 121.556 390.398 121.556 387.924C121.554 370.926 121.581 353.927 121.374 336.931C121.276 328.814 123.772 322.126 129.657 316.325C147.679 298.562 165.43 280.523 183.361 262.667C186.231 259.81 187.674 257.381 186.349 252.788C182.456 239.295 189.867 224.989 202.961 219.118C216.361 213.11 232.079 217.792 240.874 230.412C248.399 241.209 246.742 257.645 237.166 267.185C225.763 278.546 212.959 279.941 197.696 271.206C185.588 283.361 173.377 295.59 161.203 307.857C154.876 314.233 148.721 320.783 142.279 327.04C139.159 330.071 137.992 333.458 138.013 337.726C138.125 360.557 138.073 383.389 138.078 406.221C138.078 408.012 138.078 409.803 138.078 411.858C132.383 411.858 127.237 411.858 121.649 411.777ZM229.839 246.54C229.681 238.107 222.616 232.769 215.937 232.034C210.184 231.401 204.311 235.108 202.18 240.649C200.051 246.187 200.373 251.509 204.503 255.989C208.513 260.338 213.659 262.004 219.452 260.43C226.01 258.648 229.22 253.967 229.839 246.54Z" fill="#F5B92B"/>
+<path d="M329.184 299.243C333.38 301.78 337.347 304.499 341.608 307.443C329.112 320.506 316.365 333.387 303.514 346.162C294.667 354.958 285.586 363.522 276.839 372.414C275.494 373.781 274.648 376.426 274.817 378.371C276.305 395.451 266.328 409.504 249.94 412.986C234.742 416.215 217.973 405.118 214.465 389.51C210.723 372.863 220.55 356.8 236.721 353.13C247.027 350.791 251.979 352.023 266.443 360.661C287.225 340.303 308.09 319.863 329.184 299.243ZM250.13 397.114C258.982 392.309 261.971 383.509 257.508 375.394C253.634 368.353 244.032 365.642 236.7 369.521C230.092 373.018 227.135 381.538 229.979 388.888C232.852 396.315 240.221 399.552 250.13 397.114Z" fill="#4CA868"/>
+<path d="M418.229 221.319C423.107 220.927 427.908 221.004 433.149 221.124C433.619 259.47 433.647 297.774 433.68 336.078C433.69 347.403 433.051 358.777 433.877 370.043C435.358 390.232 412.016 413.481 392.246 412.368C389.971 412.24 387.683 412.351 383.982 412.351C391.3 405.486 397.823 399.742 403.897 393.557C409.168 388.188 415.976 383.834 417.48 375.606C417.865 373.5 418.026 371.325 418.029 369.181C418.092 320.05 418.119 270.919 418.229 221.319Z" fill="#49A568"/>
+</svg>
+             <div>
+               <h1 style="margin:0">ADAPT Architecture</h1>
+               <p style="margin:0">by deeptree.in · v1.0</p>
+             </div>
+           </div>
+    </div>
+    <div class="sidebar-stats"><div class="stat-chip"><div class="n n-blue">ADAPT</div><div class="l">Framework</div></div><div class="stat-chip"><div class="n n-blue">1.0</div><div class="l">Version</div></div><div class="stat-chip"><div class="n n-pass">3</div><div class="l">Heal Scripts</div></div><div class="stat-chip"><div class="n n-purple">∞</div><div class="l">Projects</div></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Sections</div>
+      <a class="nav-item active" href="#overview">
+      <span class="nav-dot" style="background:#4a90d9"></span> Overview
+    </a><a class="nav-item" href="#problem">
+      <span class="nav-dot" style="background:#f44336"></span> Problem & Solution
+    </a><a class="nav-item" href="#architecture">
+      <span class="nav-dot" style="background:#9c6ef5"></span> Architecture
+    </a><a class="nav-item" href="#features">
+      <span class="nav-dot" style="background:#4caf50"></span> Features & Scripts
+    </a><a class="nav-item" href="#prism">
+      <span class="nav-dot" style="background:#4dd0e1"></span> Prism Design System
+    </a><a class="nav-item" href="#newproject">
+      <span class="nav-dot" style="background:#ff9800"></span> New Project Guide
+    </a><a class="nav-item" href="#existingapp">
+      <span class="nav-dot" style="background:#ff9800"></span> Existing App Guide
+    </a><a class="nav-item" href="#plugplay">
+      <span class="nav-dot" style="background:#4caf50"></span> Plug & Play
+    </a><a class="nav-item" href="#conventions">
+      <span class="nav-dot" style="background:#888"></span> Conventions
+    </a><a class="nav-item" href="#roadmap">
+      <span class="nav-dot" style="background:#888"></span> Roadmap
+    </a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title">ADAPT — Automated Data-driven Playwright Testing</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="topbar-meta">Architecture &amp; Developer Guide · deeptree.in</div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark theme">
+          <span class="toggle-icon" id="toggleIcon">☀️</span>
+          <span id="toggleLabel">Light</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-pass" style="width:100%"></div>
+      <div class="progress-fail" style="width:0%"></div>
+      <div class="progress-skip" style="width:0%"></div>
+    </div>
+
+    <div class="content">
+      <section id="overview">
+  <div class="section-title">Overview</div>
+  
+<div class="kpi-grid"><div class="kpi-card"><div class="kpi-n n-blue">E2E</div><div class="kpi-l">Test Type</div></div><div class="kpi-card"><div class="kpi-n n-blue">Multi</div><div class="kpi-l">Multi-Project</div></div><div class="kpi-card"><div class="kpi-n n-purple">Excel</div><div class="kpi-l">Data-Driven</div></div><div class="kpi-card"><div class="kpi-n n-pass">3</div><div class="kpi-l">Heal Scripts</div></div><div class="kpi-card"><div class="kpi-n n-purple">Prism</div><div class="kpi-l">Design System</div></div><div class="kpi-card"><div class="kpi-n n-blue">100%</div><div class="kpi-l">TypeScript</div></div></div>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Aspect</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Full Name</strong></td><td>Automated Data-driven Playwright Testing</td></tr>
+      <tr><td><strong>Built By</strong></td><td>DeepTree (deeptree.in)</td></tr>
+      <tr><td><strong>Purpose</strong></td><td>A scalable, plug-and-play E2E test automation platform. One framework repo tests any number of web applications. No duplication of infrastructure across projects.</td></tr>
+      <tr><td><strong>Test Framework</strong></td><td>Playwright (TypeScript) — industry standard, native TS, parallel execution, built-in screenshots on failure</td></tr>
+      <tr><td><strong>Data Source</strong></td><td>Excel workbook per project — test cases, run control flags, user roles, and result history all in one file</td></tr>
+      <tr><td><strong>Selector Healing</strong></td><td>Three heal scripts (heal:selectors, heal:actions, heal:dialogs) auto-fix broken selectors by inspecting the live app</td></tr>
+      <tr><td><strong>Report Format</strong></td><td>Prism — DeepTree's Playwright-style dark/light HTML design system (playwright-theme.css + html-builder.mjs)</td></tr>
+      <tr><td><strong>First Project</strong></td><td>HappyQ — 53/56 tests passing, 5 roles, 40+ screens, 14 dialogs mapped</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+<section id="problem">
+  <div class="section-title">Problem &amp; Solution</div>
+  
+<div class="table-wrap" style="margin-bottom:16px">
+  <table>
+    <thead><tr><th>Problem</th><th>Without ADAPT</th><th>With ADAPT</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Starting a new project's test suite</td>
+        <td>Set up Playwright, write config, build auth, design Excel schema — hours of boilerplate</td>
+        <td><code>npm run new:project -- --name myapp --src D:\myapp</code> — scaffolds everything in seconds</td>
+      </tr>
+      <tr>
+        <td>Selector guesses from source code are wrong</td>
+        <td>Run tests, read error, open app, find real text, fix manually — repeated for every page</td>
+        <td><code>npm run heal:selectors -- --project myapp</code> — auto-heals all headings from live DOM</td>
+      </tr>
+      <tr>
+        <td>Adding a second app to automate</td>
+        <td>Copy the entire test project, duplicate infrastructure, maintain two repos</td>
+        <td>Add <code>projects/myapp/</code> folder — all infrastructure shared, nothing duplicated</td>
+      </tr>
+      <tr>
+        <td>Non-developers need to control test runs</td>
+        <td>Edit TypeScript files — requires dev knowledge</td>
+        <td>Set <code>RUN: YES/NO</code> in Excel — no code knowledge needed</td>
+      </tr>
+      <tr>
+        <td>Test data changes between runs</td>
+        <td>Hardcoded data in test files — fails when data changes</td>
+        <td>Edit <code>TEST_DATA</code> column in Excel — smart merge preserves edits on every update</td>
+      </tr>
+      <tr>
+        <td>Viewing test results history</td>
+        <td>Only the latest Playwright HTML report — previous runs lost</td>
+        <td>Prism HTML report auto-generated after every run, dated archive kept in <code>reports/</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</section>
+<section id="architecture">
+  <div class="section-title">Architecture</div>
+  <div class="folder-tree">
+<div class="tree-row">
+  <span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📦</span><span class="tree-label tc-root">adapt/</span><span class="tree-desc">Framework root — clone once, test many apps</span>
+</div>
+<div class="tree-children">
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-0');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-core">core/</span><span class="tree-desc">Shared infrastructure — never project-specific</span>
+</div>
+<div class="tree-children " id="arch-0">
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-1');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-muted">lib/</span><span class="tree-desc">Shared TypeScript utilities</span>
+</div>
+<div class="tree-children " id="arch-1">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">spreadsheet-reader.ts</span><span class="tree-desc">Reads TEST_CONTROL + E2E_TESTS + TEST_USERS sheets from Excel</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">results-writer.ts</span><span class="tree-desc">Appends test results to RESULTS sheet after every run</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">slack-reporter.ts</span><span class="tree-desc">Posts pass/fail summary to a Slack webhook</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">run-id.ts</span><span class="tree-desc">Generates ADAPT-YYYYMMDD-HHmm run IDs, tags created test data</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">cleanup.ts</span><span class="tree-desc">Deletes all ADAPT-tagged records via Supabase service role key</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-7');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-muted">fixtures/</span><span class="tree-desc">Shared test fixtures</span>
+</div>
+<div class="tree-children " id="arch-7">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-pass">auth.setup.ts</span><span class="tree-desc">Generic login fixture — logs in per role and saves storageState</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-9');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-assets">assets/</span><span class="tree-desc">Prism design system files</span>
+</div>
+<div class="tree-children " id="arch-9">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">🎨</span><span class="tree-label tc-purple">playwright-theme.css</span><span class="tree-desc">Prism — dark/light CSS design system, all tokens + components</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-purple">report-template.html</span><span class="tree-desc">Blank Prism HTML shell — copy and fill in sections</span>
+</div></div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">playwright.base.config.ts</span><span class="tree-desc">Base Playwright config — extended by every project</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-13');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-projects">projects/</span><span class="tree-desc">One folder per application under test</span>
+</div>
+<div class="tree-children " id="arch-13">
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-14');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-projects">happyq/</span><span class="tree-desc">HappyQ — first project (53 tests, 5 roles, 40+ screens)</span>
+</div>
+<div class="tree-children " id="arch-14">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">playwright.config.ts</span><span class="tree-desc">Extends base, sets BASE_URL, roles, globalSetup, JSON reporter</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">global-setup.ts</span><span class="tree-desc">Runs cleanup (CLEANUP=true) and generates Run ID before tests start</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-muted">.env.local</span><span class="tree-desc">Credentials — gitignored. Copy from .env.example and fill in.</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-muted">.env.example</span><span class="tree-desc">Template — committed. Documents all required env vars.</span>
+</div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-19');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-muted">data/</span><span class="tree-desc">Excel testbook</span>
+</div>
+<div class="tree-children " id="arch-19">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📊</span><span class="tree-label tc-pass">HappyQ_Tests.xlsx</span><span class="tree-desc">4 sheets: TEST_CONTROL (run flags), E2E_TESTS, TEST_USERS, RESULTS</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-21');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▶</span><span class="tree-icon">📁</span><span class="tree-label tc-muted">pages/</span><span class="tree-desc">Page Object Model — one class per screen</span>
+</div>
+<div class="tree-children collapsed" id="arch-21">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">&lt;module&gt;/&lt;Screen&gt;Page.ts</span><span class="tree-desc">One file per screen: goto(), expectLoaded(), action methods</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">&lt;module&gt;/dialogs/&lt;x&gt;Dialog.ts</span><span class="tree-desc">One file per modal: expectOpen(), fill(), submit(), cancel()</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-24');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▶</span><span class="tree-icon">📁</span><span class="tree-label tc-muted">tests/</span><span class="tree-desc">E2E test files — one per module</span>
+</div>
+<div class="tree-children collapsed" id="arch-24">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">auth/auth.setup.ts</span><span class="tree-desc">Logs in once per role, saves .auth/&lt;role&gt;.json</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📘</span><span class="tree-label tc-muted">&lt;module&gt;/&lt;module&gt;.e2e.ts</span><span class="tree-desc">E2E tests using page objects — one describe per screen</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-27');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle">▶</span><span class="tree-icon">📁</span><span class="tree-label tc-muted">reports/</span><span class="tree-desc">Auto-generated Prism HTML reports</span>
+</div>
+<div class="tree-children collapsed" id="arch-27">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-purple">report-latest.html</span><span class="tree-desc">Always the most recent run — overwritten each time</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-purple">report-YYYYMMDD-HHmm.html</span><span class="tree-desc">Dated archive — one file per run, kept forever</span>
+</div></div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-30');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle">▶</span><span class="tree-icon">📁</span><span class="tree-label tc-muted">onlinebooking/</span><span class="tree-desc">Next project — just run: npm run new:project -- --name onlinebooking</span>
+</div>
+<div class="tree-children collapsed" id="arch-30">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📄</span><span class="tree-label tc-muted">(same structure as happyq/)</span><span class="tree-desc">All core infrastructure shared — zero setup overhead</span>
+</div></div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-32');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-scripts">scripts/</span><span class="tree-desc">Framework tooling — all commands</span>
+</div>
+<div class="tree-children " id="arch-32">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">new-project.mjs</span><span class="tree-desc">Scaffolds new project. With --src: scans source, generates page objects + stubs</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">update-testbook.mjs</span><span class="tree-desc">Smart-merges test rows into Excel — preserves user-edited TEST_DATA / RUN / NOTES</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">setup-test-users.mjs</span><span class="tree-desc">Enables email/password login for existing Supabase users (run after db:reset)</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">generate-report.mjs</span><span class="tree-desc">Reads Playwright JSON, generates dated Prism HTML report. Auto-runs post-test.</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">generate-architecture.mjs</span><span class="tree-desc">Generates this document. Re-run to refresh: npm run generate:architecture</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-pass">heal-selectors.mjs</span><span class="tree-desc">Heals expectLoaded() heading selectors from live DOM</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-pass">heal-actions.mjs</span><span class="tree-desc">Heals button / tab / radio / placeholder selectors in action methods</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-pass">heal-dialogs.mjs</span><span class="tree-desc">Heals dialog fill() / submit() / cancel() selectors from live DOM</span>
+</div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-41');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-muted">testdata/</span><span class="tree-desc">Per-project test case definitions</span>
+</div>
+<div class="tree-children " id="arch-41">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-amber">happyq.mjs</span><span class="tree-desc">HappyQ test rows — add new modules here, then run update:testbook</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-muted">&lt;project&gt;.mjs</span><span class="tree-desc">One file per project — same structure as happyq.mjs</span>
+</div></div>
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('arch-44');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle">▼</span><span class="tree-icon">📂</span><span class="tree-label tc-muted">lib/</span><span class="tree-desc">Shared script utilities</span>
+</div>
+<div class="tree-children " id="arch-44">
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-purple">html-builder.mjs</span><span class="tree-desc">Prism component functions: getBaseHtml(), createSection(), createTable(), createPill(), createFolderTree()...</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-muted">detector.mjs</span><span class="tree-desc">Auto-detects app framework from package.json + folder structure</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-muted">scanner.mjs</span><span class="tree-desc">Scans routes, components, and dialog files from app source code</span>
+</div>
+<div class="tree-row">
+  <span class="tree-spacer">│&nbsp;&nbsp;</span><span class="tree-spacer">&nbsp;&nbsp;&nbsp;</span><span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📙</span><span class="tree-label tc-muted">generator.mjs</span><span class="tree-desc">Generates page objects, dialog classes, test stubs, and TODO_REPORT.md</span>
+</div></div></div>
+<div class="tree-row">
+  <span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📝</span><span class="tree-label tc-purple">CLAUDE.md</span><span class="tree-desc">AI conventions — auto-read by Claude Code. Enforces all patterns, scenarios, compliance reports.</span>
+</div>
+<div class="tree-row">
+  <span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📝</span><span class="tree-label tc-muted">CONVENTIONS.md</span><span class="tree-desc">Human reference — page object rules, dialog rules, test file rules, Excel schema</span>
+</div>
+<div class="tree-row">
+  <span class="tree-connector">├──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📝</span><span class="tree-label tc-muted">DEVELOPMENT.md</span><span class="tree-desc">Day-to-day guide — all commands, selector verification, debugging, CI setup</span>
+</div>
+<div class="tree-row">
+  <span class="tree-connector">└──</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">📝</span><span class="tree-label tc-muted">README.md</span><span class="tree-desc">ADAPT overview, quick start, and links</span>
+</div></div>
+</div><div class="table-wrap">
+  <table>
+    <thead><tr><th>Layer</th><th>What It Is</th><th>Who Changes It</th><th>When</th></tr></thead>
+    <tbody><tr><td><span class="pill pill-blue">core/</span></td><td>Shared infrastructure — spreadsheet reader, auth fixture, cleanup, Prism assets</td><td>Framework maintainer</td><td>Rarely — only when adding new cross-project capabilities</td></tr>
+<tr><td><span class="pill pill-amber">projects/</span></td><td>Project-specific — pages, dialogs, tests, Excel, config</td><td>Project test developer</td><td>When adding new screens, modules, or fixing selectors</td></tr>
+<tr><td><span class="pill pill-cyan">scripts/</span></td><td>Framework tooling — new:project, heal:*, generate:report, update:testbook</td><td>Framework maintainer</td><td>When adding new automation capabilities</td></tr></tbody>
+  </table>
+</div>
+</section>
+<section id="features">
+  <div class="section-title">Features &amp; Scripts</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">All features available to every project in the framework — no per-project configuration needed.</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Feature</th><th>Description</th><th>Benefit</th></tr></thead>
+    <tbody><tr><td>Data-Driven Testing</td><td>Test cases live in Excel (<code>TEST_DATA</code> column). Non-developers edit data without touching code.</td><td>Business-controlled test data</td></tr>
+<tr><td>Run Control</td><td>Per-test <code>RUN: YES/NO</code> flag in Excel. Toggle modules on/off without code changes.</td><td>Selective test execution</td></tr>
+<tr><td>Multi-Role Testing</td><td>5 roles in HappyQ (Standard, Receptionist, Doctor, Accountant, Admin). Each has its own saved Playwright session.</td><td>Full RBA coverage</td></tr>
+<tr><td>Session Reuse</td><td>Login once per role via auth setup → all tests reuse storageState. Auth tests always use real login.</td><td>Fast runs, realistic auth tests</td></tr>
+<tr><td>Run ID Tagging</td><td>All created data tagged <code>[ADAPT-YYYYMMDD-HHmm]</code>. Cleanup deletes only ADAPT-tagged records.</td><td>Safe, repeatable test data</td></tr>
+<tr><td>CLEANUP flag</td><td><code>CLEANUP=true npm run test:myapp</code> deletes previous run data before starting.</td><td>Clean slate every run</td></tr>
+<tr><td>Multi-Environment</td><td><code>ENV_FILE=.env.staging npm run test:myapp</code> — same tests against any environment.</td><td>One suite, many targets</td></tr>
+<tr><td>Slack Notifications</td><td>Pass/fail summary posted to Slack after every run.</td><td>Team-wide visibility</td></tr>
+<tr><td>Prism Reports</td><td>Dated HTML report auto-generated after every run. Dark/light theme, module grouping, error details.</td><td>Persistent run history</td></tr>
+<tr><td>Source Scanner</td><td><code>new:project --src</code> auto-detects framework, scans routes + dialogs, generates stubs.</td><td>Minutes not hours to onboard</td></tr>
+<tr><td>Smart Excel Merge</td><td><code>update:testbook</code> preserves user edits — TEST_DATA, RUN, NOTES never overwritten.</td><td>Safe to re-run anytime</td></tr>
+<tr><td>TODO Report</td><td>Generated with new projects — lists every guessed selector with confidence level and codegen instructions.</td><td>Clear verification roadmap</td></tr></tbody>
+  </table>
+</div>
+<div style="margin-top:20px"><div class="script-list"><div class="script-item">
+      <div class="script-cmd-name">new:project</div>
+      <div class="script-body">
+        <div class="script-desc">Scaffolds a complete new project. With --src, auto-detects the app framework (React Router, Next.js, Vue, Angular), scans all routes and dialog components, and generates page objects + test stubs + TODO_REPORT.md.</div>
+        <div class="script-example">npm run new:project -- --name myapp --src D:\myapp</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">update:testbook</div>
+      <div class="script-body">
+        <div class="script-desc">Smart-merges test case definitions into the project Excel workbook. Adds new rows, preserves user-edited TEST_DATA / RUN / NOTES columns, and flags removed tests [OBSOLETE]. Never overwrites user data.</div>
+        <div class="script-example">npm run update:testbook -- --project myapp</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">heal:selectors</div>
+      <div class="script-body">
+        <div class="script-desc">Navigates every page route using a role session, extracts the real h1/h2 heading from the live DOM, and patches expectLoaded() selectors automatically. Detects auth-redirect and permission-denied pages.</div>
+        <div class="script-example">npm run heal:selectors -- --project myapp [--role admin] [--module settings]</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">heal:actions</div>
+      <div class="script-body">
+        <div class="script-desc">Extracts all visible buttons, tabs, radio buttons, and input placeholders from each live page. Fuzzy-matches against action method selectors, auto-corrects role type (e.g. button→radio for Radix ToggleGroup).</div>
+        <div class="script-example">npm run heal:actions -- --project myapp [--role receptionist]</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">heal:dialogs</div>
+      <div class="script-body">
+        <div class="script-desc">Auto-detects dialog triggers from test files, navigates to parent page, opens each dialog, and extracts live placeholders + button labels. Patches getByLabel→getByPlaceholder and adds .first() to button clicks.</div>
+        <div class="script-example">npm run heal:dialogs -- --project myapp [--dialog PatientDialog]</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">generate:report</div>
+      <div class="script-body">
+        <div class="script-desc">Reads Playwright JSON output after a test run, enriches with Excel metadata (module, screen, role), and generates a dated Prism HTML report. Auto-runs via posttest hook — no manual step needed.</div>
+        <div class="script-example">npm run generate:report -- --project myapp [--open]</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div><div class="script-item">
+      <div class="script-cmd-name">setup-test-users</div>
+      <div class="script-body">
+        <div class="script-desc">Enables email/password login for existing Supabase users without creating new accounts. Uses each user's email as their password. Run after every db:reset.</div>
+        <div class="script-example">node scripts/setup-test-users.mjs</div>
+      </div>
+      <div class="script-status"><span class="pill pill-pass">✓ Built</span></div>
+    </div></div></div>
+</section>
+<section id="prism">
+  <div class="section-title">Prism — The Design System</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+  <strong style="color:var(--color-text)">Prism</strong> is DeepTree's HTML document format — a Playwright-inspired dark/light design system
+  used for all ADAPT outputs: test reports, architecture docs, summaries, and dashboards.
+  The name reflects how it refracts raw data into clear, organised views.
+</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Asset</th><th>Location</th><th>Purpose</th></tr></thead>
+    <tbody><tr><td><code>playwright-theme.css</code></td><td><code>core/assets/playwright-theme.css</code></td><td>All design tokens, components, dark + light CSS. Link or inline in any HTML.</td></tr>
+<tr><td><code>report-template.html</code></td><td><code>core/assets/report-template.html</code></td><td>Blank Prism shell — sidebar, topbar, theme toggle pre-wired. Copy and add sections.</td></tr>
+<tr><td><code>html-builder.mjs</code></td><td><code>scripts/lib/html-builder.mjs</code></td><td>JS functions for programmatic HTML generation: getBaseHtml(), createSection(), createTable(), createPill(), createKpiGrid(), createRunTimeline(), createScriptList().</td></tr></tbody>
+  </table>
+</div>
+<div style="margin-top:16px">
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Component</th><th>Class / Function</th><th>Description</th></tr></thead>
+    <tbody><tr><td>Page shell</td><td><code>getBaseHtml(opts)</code></td><td>Full page with sidebar, topbar, progress bar, theme toggle, scroll-spy nav</td></tr>
+<tr><td>Section</td><td><code>createSection(id, title, html)</code></td><td>Titled section with anchor ID for sidebar navigation</td></tr>
+<tr><td>Table</td><td><code>createTable(headers, rows)</code></td><td>Bordered table with hover rows, monospace IDs, dark/light adaptive</td></tr>
+<tr><td>Status pill</td><td><code>createPill(text, type)</code></td><td>Inline badge: pass · fail · skip · blue · green · amber · red · purple · rose · cyan · gray</td></tr>
+<tr><td>KPI grid</td><td><code>createKpiGrid(items)</code></td><td>Row of stat cards with large numbers (pass count, duration, etc.)</td></tr>
+<tr><td>Run timeline</td><td><code>createRunTimeline(runs)</code></td><td>Visual bar chart of run history with pass/fail/skip proportions</td></tr>
+<tr><td>Script list</td><td><code>createScriptList(scripts)</code></td><td>Command cards with name, description, example, built/backlog badge</td></tr>
+<tr><td>Note box</td><td><code>createNote(text)</code></td><td>Amber warning/info callout box</td></tr>
+<tr><td>Theme toggle</td><td>Built into every page</td><td>Switches dark ↔ light, persists to localStorage</td></tr>
+<tr><td>Active nav</td><td>Built into every page</td><td>IntersectionObserver highlights current section in sidebar as you scroll</td></tr></tbody>
+  </table>
+</div>
+</div>
+<div style="margin-top:16px">
+<div class="script-list">
+  <div class="script-item">
+    <div class="script-cmd-name" style="width:110px">Link CSS</div>
+    <div class="script-body">
+      <div class="script-desc">For pages inside the adapt/ repo — link the shared CSS file.</div>
+      <div class="script-example">&lt;link rel="stylesheet" href="../../core/assets/playwright-theme.css"&gt;</div>
+    </div>
+  </div>
+  <div class="script-item">
+    <div class="script-cmd-name" style="width:110px">Inline CSS</div>
+    <div class="script-body">
+      <div class="script-desc">For portable, self-contained single-file HTML (e.g. emailed reports).</div>
+      <div class="script-example">import { getInlineCss } from './scripts/lib/html-builder.mjs';</div>
+    </div>
+  </div>
+  <div class="script-item">
+    <div class="script-cmd-name" style="width:110px">Programmatic</div>
+    <div class="script-body">
+      <div class="script-desc">Generate full reports from data using the builder functions.</div>
+      <div class="script-example">const html = getBaseHtml({ title, sidebarStats, content: [ createSection(...) ] });</div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+<section id="newproject">
+  <div class="section-title">New Project Guide</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+  For a brand new application that has no existing test coverage.
+</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Step</th><th>Command / Action</th><th>What Happens</th><th>Manual?</th></tr></thead>
+    <tbody><tr><td>1</td><td><code>npm run new:project -- --name myapp --src D:\myapp</code></td><td>Scaffolds folders, config, env, BasePage, testdata file, Excel workbook. If --src provided: auto-detects framework, scans routes + dialogs, generates page objects + test stubs + TODO_REPORT.md</td><td><span class="pill pill-pass">Automated</span></td></tr>
+<tr><td>2</td><td>Open <code>projects/myapp/TODO_REPORT.md</code></td><td>Reviews every generated selector with confidence level (✅ HIGH / ⚠️ MEDIUM / ❌ LOW)</td><td><span class="pill pill-blue">Review</span></td></tr>
+<tr><td>3</td><td><code>npx playwright codegen http://localhost:PORT/route</code></td><td>Click elements in browser → Playwright writes real selectors → paste into page objects</td><td><span class="pill pill-amber">Per page</span></td></tr>
+<tr><td>4</td><td><code>npm run heal:selectors -- --project myapp</code></td><td>Auto-heals all expectLoaded() heading selectors from live DOM</td><td><span class="pill pill-pass">Automated</span></td></tr>
+<tr><td>5</td><td><code>npm run heal:actions -- --project myapp</code></td><td>Auto-heals button/tab/placeholder selectors in action methods</td><td><span class="pill pill-pass">Automated</span></td></tr>
+<tr><td>6</td><td><code>npm run heal:dialogs -- --project myapp</code></td><td>Auto-heals dialog fill/submit/cancel selectors</td><td><span class="pill pill-pass">Automated</span></td></tr>
+<tr><td>7</td><td>Fill in <code>TEST_DATA</code> column in Excel</td><td>Add meaningful test values (names, phones, dates) — smart merge preserves these forever</td><td><span class="pill pill-amber">Once</span></td></tr>
+<tr><td>8</td><td>Fill in <code>projects/myapp/.env.local</code></td><td>Add BASE_URL, test user credentials, SUPABASE_URL</td><td><span class="pill pill-amber">Once</span></td></tr>
+<tr><td>9</td><td><code>node scripts/setup-test-users.mjs</code></td><td>Enable email/password login for test users in Supabase</td><td><span class="pill pill-amber">Once</span></td></tr>
+<tr><td>10</td><td><code>npm run test:myapp</code></td><td>Run full suite — report auto-generated at projects/myapp/reports/</td><td><span class="pill pill-pass">Automated</span></td></tr></tbody>
+  </table>
+</div>
+<div class="note">When adding a new module later: create page object + dialog classes + test file → add rows to testdata/myapp.mjs → run update:testbook → run heal scripts → run tests.</div>
+</section>
+<section id="existingapp">
+  <div class="section-title">Existing App Guide</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+  For an application that already exists and has running code. ADAPT plugs in non-invasively — no changes to the app's source code.
+</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Step</th><th>Command / Action</th><th>Notes</th></tr></thead>
+    <tbody><tr><td>1</td><td>Clone the ADAPT repo alongside your app</td><td><code>git clone adapt/ D:\adapt</code></td></tr>
+<tr><td>2</td><td><code>cd D:\adapt &amp;&amp; npm install &amp;&amp; npm run install:browsers</code></td><td>Install dependencies + Playwright Chromium once per machine</td></tr>
+<tr><td>3</td><td><code>npm run new:project -- --name myapp --src D:\myapp</code></td><td>Source scanner detects framework, generates page objects from your existing routes and components</td></tr>
+<tr><td>4</td><td>Start the app: <code>cd D:\myapp &amp;&amp; npm run dev</code></td><td>The app must be running for heal scripts to work</td></tr>
+<tr><td>5</td><td><code>npm run heal:selectors -- --project myapp</code></td><td>Fix all heading selectors — most will be auto-healed</td></tr>
+<tr><td>6</td><td><code>npm run heal:actions -- --project myapp</code></td><td>Fix action method selectors</td></tr>
+<tr><td>7</td><td><code>npm run heal:dialogs -- --project myapp</code></td><td>Fix dialog selectors for dialogs referenced in test files</td></tr>
+<tr><td>8</td><td>Create test users in your app/database</td><td>One user per role. Use <code>node scripts/setup-test-users.mjs</code> for Supabase apps.</td></tr>
+<tr><td>9</td><td><code>cp projects/myapp/.env.example projects/myapp/.env.local</code></td><td>Fill in credentials and BASE_URL</td></tr>
+<tr><td>10</td><td><code>npm run test:myapp</code></td><td>First run — expect some failures from selectors still needing codegen. Fix iteratively.</td></tr></tbody>
+  </table>
+</div>
+<div style="margin-top:16px">
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Framework</th><th>Auto-Detection</th><th>Route Source</th><th>Dialog Detection</th></tr></thead>
+    <tbody>
+      <tr><td>React + React Router</td><td><span class="pill pill-pass">✓ Full</span></td><td>App.tsx / router.tsx</td><td>Files with "Dialog" in name</td></tr>
+      <tr><td>Next.js App Router</td><td><span class="pill pill-pass">✓ Full</span></td><td>app/ folder structure</td><td>Files with "Dialog" in name</td></tr>
+      <tr><td>Next.js Pages Router</td><td><span class="pill pill-pass">✓ Full</span></td><td>pages/ folder structure</td><td>Files with "Dialog" in name</td></tr>
+      <tr><td>TanStack Router</td><td><span class="pill pill-pass">✓ Full</span></td><td>src/routes/ config</td><td>Files with "Dialog" in name</td></tr>
+      <tr><td>Vue + Vue Router</td><td><span class="pill pill-blue">Partial</span></td><td>src/router/index.ts</td><td>Files with "Dialog" in name</td></tr>
+      <tr><td>Angular</td><td><span class="pill pill-amber">Basic</span></td><td>Component scan</td><td>Files with "dialog" in name</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+</section>
+<section id="plugplay">
+  <div class="section-title">Plug &amp; Play</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+  ADAPT is designed as a platform, not a per-project tool. The monorepo structure means every new application adds a folder and inherits the full framework.
+</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>What's Shared (core/)</th><th>What's Per-Project (projects/name/)</th></tr></thead>
+    <tbody><tr><td>Spreadsheet reader + results writer</td><td>playwright.config.ts (extends base)</td></tr>
+<tr><td>Slack reporter</td><td>global-setup.ts (cleanup + Run ID)</td></tr>
+<tr><td>Auth fixture (generic login + session save)</td><td>.env.local (credentials — gitignored)</td></tr>
+<tr><td>Run ID generator + cleanup engine</td><td>data/*.xlsx (testbook — 4 standard sheets)</td></tr>
+<tr><td>Base Playwright config</td><td>pages/ (Page Object Model)</td></tr>
+<tr><td>Prism design system (CSS + builder)</td><td>tests/ (E2E test files)</td></tr>
+<tr><td>All heal scripts</td><td>reports/ (auto-generated HTML)</td></tr>
+<tr><td>new:project + update:testbook scripts</td><td>.auth/ (role sessions — gitignored)</td></tr></tbody>
+  </table>
+</div>
+<div style="margin-top:16px">
+<div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:4px;padding:16px 20px;font-family:var(--font-mono);font-size:12px;line-height:2;color:var(--color-text-muted)">
+<span style="color:var(--color-text-dim)"># Adding a second project takes under 5 minutes:</span>
+<br>
+<span style="color:var(--color-accent)">npm run new:project</span> -- --name <span style="color:var(--color-pass)">onlinebooking</span> --src D:\onlinebooking
+<br><span style="color:var(--color-text-dim)"># → Detects React Router, scans 20 routes, generates 20 page objects, creates Excel</span>
+<br><br>
+<span style="color:var(--color-accent)">npm run heal:selectors</span> -- --project <span style="color:var(--color-pass)">onlinebooking</span>
+<br><span style="color:var(--color-text-dim)"># → Navigates each page, heals headings automatically</span>
+<br><br>
+<span style="color:var(--color-accent)">npm run test:onlinebooking</span>
+<br><span style="color:var(--color-text-dim)"># → Full suite runs, Prism report generated at projects/onlinebooking/reports/</span>
+</div>
+</div>
+<div class="note">Every project added to ADAPT gets: heal scripts, Prism reports, Excel run control, multi-role auth, Slack notifications, and CI workflows — for free. Zero setup beyond the project folder itself.</div>
+</section>
+<section id="conventions">
+  <div class="section-title">Conventions &amp; AI Enforcement</div>
+  
+<p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+  Enforced automatically by <code>CLAUDE.md</code> when the ADAPT repo is open in Claude Code.
+  Every AI session follows these conventions without being reminded.
+</p>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Convention</th><th>Rule</th><th>Why</th></tr></thead>
+    <tbody><tr><td>Page objects</td><td>Extend <code>BasePage</code>, always have <code>goto()</code>, <code>expectLoaded()</code>, <code>expectAccessDenied()</code></td><td>Consistent interface across all pages</td></tr>
+<tr><td>Dialog classes</td><td>Do NOT extend BasePage. Always have <code>expectOpen()</code>, typed <code>fill(data)</code> with interface, action method, <code>cancel()</code></td><td>Dialogs are scoped, not pages</td></tr>
+<tr><td>Dialog scope</td><td>All interactions scoped to <code>getByRole('dialog')</code> to prevent selector conflicts</td><td>Avoids multiple-match strict mode errors</td></tr>
+<tr><td>Selectors</td><td>Use <code>getByRole</code>, <code>getByLabel</code>, <code>getByPlaceholder</code> — never CSS class selectors</td><td>Resilient to styling changes</td></tr>
+<tr><td>shadcn labels</td><td><code>getByPlaceholder()</code> preferred over <code>getByLabel()</code> inside shadcn dialogs</td><td>shadcn FormLabel htmlFor is unreliable</td></tr>
+<tr><td>Test IDs</td><td><code>MODULE-E2E-001</code> format. RBA checks: <code>RBA-MODULE-001</code></td><td>Consistent, searchable, matches Excel</td></tr>
+<tr><td>storageState</td><td>File named after role lowercased: <code>.auth/accountant.json</code></td><td>Convention enforced by CLAUDE.md</td></tr>
+<tr><td>Compliance report</td><td>After every creation task, Claude produces a compliance table (followed / missed / assumptions)</td><td>Catches issues before tests run</td></tr></tbody>
+  </table>
+</div>
+</section>
+<section id="roadmap">
+  <div class="section-title">Roadmap</div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Item</th><th>Description</th><th>Priority</th></tr></thead>
+    <tbody><tr><td>Update + Delete test cases</td><td>Edit patient, edit appointment, cancel invoice — needs test cases using existing dialog classes in edit mode</td><td><span class="pill pill-amber">High</span></td></tr>
+<tr><td>Full journey tests</td><td>Book appointment end-to-end, billing journey (invoice → payment → print), follow-up lifecycle</td><td><span class="pill pill-amber">High</span></td></tr>
+<tr><td>Outstanding Balances role</td><td>Identify which HappyQ role has /billing/outstanding permission — enable 3 skipped tests</td><td><span class="pill pill-amber">High</span></td></tr>
+<tr><td>RBA reception fix</td><td>Identify role denied reception access — re-enable RBA-REC-001</td><td><span class="pill pill-blue">Medium</span></td></tr>
+<tr><td>Excel RESULTS history</td><td>Write test results back to Excel RESULTS sheet after each run (in addition to JSON) for long-term trend tracking</td><td><span class="pill pill-blue">Medium</span></td></tr>
+<tr><td>OnlineBooking project</td><td>Add second project to validate plug-and-play — use new:project --src</td><td><span class="pill pill-blue">Medium</span></td></tr>
+<tr><td>Multi-environment scripts</td><td>Add npm scripts for .env.dev, .env.test, .env.staging per project</td><td><span class="pill pill-gray">Low</span></td></tr>
+<tr><td>GitHub Actions CI</td><td>Wire on-push and nightly workflows for HappyQ — push ADAPT to remote repo first</td><td><span class="pill pill-gray">Low</span></td></tr>
+<tr><td>generate-report: all-runs mode</td><td>Option to show aggregated results across all runs in one report</td><td><span class="pill pill-gray">Low</span></td></tr>
+<tr><td>heal:actions — strict mode detection</td><td>Auto-add .first() when heal:actions detects multiple matching elements</td><td><span class="pill pill-gray">Low</span></td></tr></tbody>
+  </table>
+</div>
+</section>
+    </div>
+
+    <footer>ADAPT — Built by DeepTree</footer>
+  </main>
+</div>
+<script>
+  const _h = document.documentElement;
+  const _b = document.getElementById('themeToggle');
+  const _i = document.getElementById('toggleIcon');
+  const _l = document.getElementById('toggleLabel');
+  function _t(t) {
+    _h.setAttribute('data-theme', t);
+    localStorage.setItem('adapt-theme', t);
+    _i.textContent = t === 'light' ? '🌙' : '☀️';
+    _l.textContent = t === 'light' ? 'Dark' : 'Light';
+  }
+  _t(localStorage.getItem('adapt-theme') || 'dark');
+  _b.addEventListener('click', () => _t(_h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  const _obs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) document.querySelectorAll('.nav-item[href^="#"]').forEach(n =>
+      n.classList.toggle('active', n.getAttribute('href') === '#' + e.target.id));
+  }), { rootMargin: '-20% 0px -70% 0px' });
+  document.querySelectorAll('section[id]').forEach(s => _obs.observe(s));
+</script>
+</body>
+</html>
