@@ -47,6 +47,7 @@ const CSS_PATH  = path.resolve(__dirname, '../../core/assets/playwright-theme.cs
  * @param {string[]} opts.content        - array of HTML strings (sections)
  * @param {string}   [opts.cssPath]      - relative path to playwright-theme.css, or null to inline
  * @param {string}   [opts.badgeText]    - sidebar badge text (default: "DeepTree · ADAPT")
+ * @param {string}   [opts.logoHtml]     - optional HTML/SVG to show above the title in the sidebar
  * @returns {string} full HTML string
  */
 export function getBaseHtml(opts) {
@@ -61,6 +62,7 @@ export function getBaseHtml(opts) {
     content      = [],
     cssPath      = null,
     badgeText    = 'DeepTree · ADAPT',
+    logoHtml     = '',
   } = opts;
 
   // CSS: link or inline
@@ -91,6 +93,7 @@ export function getBaseHtml(opts) {
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-logo">
+      ${logoHtml}
       <div class="badge">${escHtml(badgeText)}</div>
       <h1>${escHtml(title)}</h1>
       <p>${escHtml(subtitle)}</p>

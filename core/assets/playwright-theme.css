@@ -92,6 +92,7 @@ code { font-family: var(--font-mono); font-size: .9em; color: #b5cea8; }
   padding: 20px 16px 16px;
   border-bottom: 1px solid var(--color-border);
 }
+.sidebar-logo svg { display: block; max-width: 100%; }
 .sidebar-logo .badge {
   font-size: 10px; font-weight: 700; letter-spacing: .08em;
   text-transform: uppercase; color: var(--color-accent);
@@ -318,3 +319,4 @@ tr:hover td { background: var(--color-bg-hover); }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
 footer { padding: 20px 24px; border-top: 1px solid var(--color-border); font-size: 11px; color: var(--color-text-dim); }
+
