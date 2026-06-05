@@ -12,6 +12,8 @@ projects/**/.env*
 projects/**/playwright-report/
 projects/**/test-results/
 projects/**/screenshots/
+projects/**/test-results.json
+projects/**/reports/
 test-results/
 playwright-report/
 

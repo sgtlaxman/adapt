@@ -22,7 +22,8 @@ export default defineConfig({
   },
   retries: 0,
   reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['html',  { outputFolder: 'playwright-report', open: 'never' }],
+    ['json',  { outputFile:   'test-results.json' }],
     ['list'],
   ],
   projects: [

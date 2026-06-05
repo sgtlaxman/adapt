@@ -1,18 +1,21 @@
-﻿{
+{
     "name":  "adapt",
     "version":  "1.0.0",
-    "description":  "ADAPT â€” Automated Data-driven Playwright Testing by DeepTree",
+    "description":  "ADAPT — Automated Data-driven Playwright Testing by DeepTree",
     "private":  true,
     "scripts":  {
-                    "test:happyq":  "playwright test --config=projects/happyq/playwright.config.ts",
-                    "test:happyq:headed":  "playwright test --config=projects/happyq/playwright.config.ts --headed",
-                    "test:happyq:report":  "playwright show-report projects/happyq/playwright-report",
-                    "install:browsers":  "playwright install chromium",
-                    "update:testbook":  "node scripts/update-testbook.mjs",
-                    "new:project":  "node scripts/new-project.mjs",
-                    "heal:selectors": "node scripts/heal-selectors.mjs",
-                    "heal:actions":   "node scripts/heal-actions.mjs",
-                    "heal:dialogs":   "node scripts/heal-dialogs.mjs"
+                    "test:happyq":          "playwright test --config=projects/happyq/playwright.config.ts",
+                    "posttest:happyq":      "node scripts/generate-report.mjs --project happyq",
+                    "test:happyq:headed":   "playwright test --config=projects/happyq/playwright.config.ts --headed",
+                    "test:happyq:report":   "playwright show-report projects/happyq/playwright-report",
+                    "install:browsers":     "playwright install chromium",
+                    "update:testbook":      "node scripts/update-testbook.mjs",
+                    "new:project":          "node scripts/new-project.mjs",
+                    "heal:selectors":       "node scripts/heal-selectors.mjs",
+                    "heal:actions":         "node scripts/heal-actions.mjs",
+                    "heal:dialogs":         "node scripts/heal-dialogs.mjs",
+                    "generate:report":      "node scripts/generate-report.mjs",
+                    "report:happyq":        "node scripts/generate-report.mjs --project happyq --open"
                 },
     "devDependencies":  {
                             "@playwright/test":  "^1.44.0",
