@@ -281,6 +281,65 @@ export function getInlineCss() {
   return fs.readFileSync(CSS_PATH, 'utf-8');
 }
 
+// ─── Folder tree ──────────────────────────────────────────────────────────────
+
+/**
+ * Creates an interactive, collapsible folder tree component.
+ *
+ * Node shape:
+ *   { name, cls, desc, open, children }
+ *   cls: 'tc-root' | 'tc-core' | 'tc-projects' | 'tc-scripts' | 'tc-assets' | 'tc-pass' | 'tc-amber' | 'tc-purple' | 'tc-muted'
+ *   open: true = expanded by default (folders), false = collapsed
+ */
+export function createFolderTree(rootNode, id = 'tree') {
+  let counter = 0;
+
+  function fileIcon(name) {
+    if (name.endsWith('/')) return '📂';
+    const ext = name.split('.').pop();
+    return { ts:'📘', mjs:'📙', css:'🎨', html:'📄', xlsx:'📊', env:'🔑', json:'📋', sql:'🗄️', md:'📝', txt:'📝' }[ext] || '📄';
+  }
+
+  function renderChildren(nodes, prefixes) {
+    return nodes.map((node, i) => {
+      const isLast    = i === nodes.length - 1;
+      const connector = isLast ? '└──' : '├──';
+      const childPfx  = [...prefixes, isLast ? '&nbsp;&nbsp;&nbsp;' : '│&nbsp;&nbsp;'];
+      const hasKids   = (node.children || []).length > 0;
+      const nid       = `${id}-${counter++}`;
+      const icon      = hasKids ? (node.open === false ? '📁' : '📂') : fileIcon(node.name);
+      const cls       = node.cls || 'tc-muted';
+      const collapsed = !hasKids || node.open === false ? 'collapsed' : '';
+      const toggleTxt = node.open === false ? '▶' : '▼';
+
+      const spacers = prefixes.map(p => `<span class="tree-spacer">${p}</span>`).join('');
+
+      if (hasKids) {
+        return `
+<div class="tree-row tree-clickable" onclick="(function(me){var c=document.getElementById('${nid}');var t=me.querySelector('.tree-toggle');var collapsed=c.classList.toggle('collapsed');t.textContent=collapsed?'▶':'▼';me.querySelector('.tree-icon').textContent=collapsed?'📁':'📂';})(this)">
+  ${spacers}<span class="tree-connector">${connector}</span><span class="tree-toggle">${toggleTxt}</span><span class="tree-icon">${icon}</span><span class="tree-label ${cls}">${escHtml(node.name)}</span>${node.desc ? `<span class="tree-desc">${escHtml(node.desc)}</span>` : ''}
+</div>
+<div class="tree-children ${collapsed}" id="${nid}">${renderChildren(node.children, childPfx)}</div>`;
+      }
+
+      return `
+<div class="tree-row">
+  ${spacers}<span class="tree-connector">${connector}</span><span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">${icon}</span><span class="tree-label ${cls}">${escHtml(node.name)}</span>${node.desc ? `<span class="tree-desc">${escHtml(node.desc)}</span>` : ''}
+</div>`;
+    }).join('');
+  }
+
+  const rootIcon = '📦';
+  const rootBody = renderChildren(rootNode.children || [], []);
+
+  return `<div class="folder-tree">
+<div class="tree-row">
+  <span class="tree-toggle" style="visibility:hidden">▶</span><span class="tree-icon">${rootIcon}</span><span class="tree-label tc-root">${escHtml(rootNode.name)}</span>${rootNode.desc ? `<span class="tree-desc">${escHtml(rootNode.desc)}</span>` : ''}
+</div>
+<div class="tree-children">${rootBody}</div>
+</div>`;
+}
+
 // ─── Theme script (embedded) ─────────────────────────────────────────────────
 
 function themeScript() {

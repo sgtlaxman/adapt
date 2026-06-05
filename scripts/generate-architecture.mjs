@@ -19,6 +19,7 @@ import {
   createPill,
   createKpiGrid,
   createScriptList,
+  createFolderTree,
   createNote,
   escHtml,
   code,
@@ -112,50 +113,138 @@ const problemContent = `
 
 // ─── Architecture ─────────────────────────────────────────────────────────────
 
-const archDiagram = `
-<div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:4px;padding:20px 24px;font-family:var(--font-mono);font-size:12px;line-height:1.8;color:var(--color-text-muted);margin-bottom:16px;overflow-x:auto">
-<span style="color:var(--color-accent);font-weight:700">adapt/</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Framework root
-├── <span style="color:var(--color-accent)">core/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Shared infrastructure (never project-specific)
-│   ├── lib/
-│   │   ├── <span style="color:var(--color-pass)">spreadsheet-reader.ts</span> &nbsp; ← Reads TEST_CONTROL + E2E_TESTS from Excel
-│   │   ├── <span style="color:var(--color-pass)">results-writer.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Appends results to RESULTS sheet
-│   │   ├── <span style="color:var(--color-pass)">slack-reporter.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Posts pass/fail summary to Slack
-│   │   ├── <span style="color:var(--color-pass)">run-id.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Generates ADAPT-YYYYMMDD-HHmm run IDs
-│   │   └── <span style="color:var(--color-pass)">cleanup.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Deletes ADAPT-tagged records via Supabase
-│   ├── fixtures/
-│   │   └── <span style="color:var(--color-pass)">auth.setup.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Generic login fixture, saves storageState per role
-│   ├── assets/
-│   │   ├── <span style="color:#9c6ef5">playwright-theme.css</span> &nbsp;&nbsp;&nbsp; ← <strong style="color:var(--color-text)">Prism</strong> design system CSS
-│   │   └── <span style="color:#9c6ef5">report-template.html</span> &nbsp;&nbsp; ← Blank Prism HTML shell for new documents
-│   └── playwright.base.config.ts &nbsp; ← Base Playwright config (extended per project)
-│
-├── <span style="color:#ff9800">projects/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← One folder per application under test
-│   ├── <span style="color:#ff9800">happyq/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← HappyQ (first project)
-│   │   ├── playwright.config.ts &nbsp;&nbsp;&nbsp; ← Extends base, sets BASE_URL + roles
-│   │   ├── global-setup.ts &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Cleanup (if flag) + generate Run ID
-│   │   ├── .env.local &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Credentials (gitignored)
-│   │   ├── .env.example &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Template (committed)
-│   │   ├── data/HappyQ_Tests.xlsx &nbsp; ← Testbook (4 sheets)
-│   │   ├── pages/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Page Object Model (one file per screen)
-│   │   │   └── &lt;module&gt;/dialogs/ &nbsp;&nbsp; ← Dialog classes (one per modal)
-│   │   ├── tests/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← E2E test files (one per module)
-│   │   └── reports/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Auto-generated Prism HTML reports
-│   └── <span style="color:#888">onlinebooking/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Next project (just add a folder)
-│
-└── <span style="color:#4dd0e1">scripts/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Framework tooling
-    ├── new-project.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Scaffolds new project (+ source scan)
-    ├── update-testbook.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Smart-merges Excel testbook
-    ├── setup-test-users.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Enables email/password for test users
-    ├── generate-report.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Generates Prism HTML report from results
-    ├── generate-architecture.mjs &nbsp; ← This script
-    ├── heal-selectors.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Heals expectLoaded() headings
-    ├── heal-actions.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Heals button/tab/placeholder selectors
-    ├── heal-dialogs.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Heals dialog fill/submit/cancel selectors
-    ├── testdata/
-    │   └── happyq.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← HappyQ test case definitions
-    └── lib/
-        └── html-builder.mjs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ← Prism component functions for HTML generation
-</div>`;
+const archDiagram = createFolderTree({
+  name: 'adapt/',
+  desc: 'Framework root — clone once, test many apps',
+  children: [
+    {
+      name: 'core/', cls: 'tc-core', open: true,
+      desc: 'Shared infrastructure — never project-specific',
+      children: [
+        {
+          name: 'lib/', cls: 'tc-muted', open: true,
+          desc: 'Shared TypeScript utilities',
+          children: [
+            { name: 'spreadsheet-reader.ts', cls: 'tc-pass', desc: 'Reads TEST_CONTROL + E2E_TESTS + TEST_USERS sheets from Excel' },
+            { name: 'results-writer.ts',     cls: 'tc-pass', desc: 'Appends test results to RESULTS sheet after every run' },
+            { name: 'slack-reporter.ts',     cls: 'tc-pass', desc: 'Posts pass/fail summary to a Slack webhook' },
+            { name: 'run-id.ts',             cls: 'tc-pass', desc: 'Generates ADAPT-YYYYMMDD-HHmm run IDs, tags created test data' },
+            { name: 'cleanup.ts',            cls: 'tc-pass', desc: 'Deletes all ADAPT-tagged records via Supabase service role key' },
+          ],
+        },
+        {
+          name: 'fixtures/', cls: 'tc-muted', open: true,
+          desc: 'Shared test fixtures',
+          children: [
+            { name: 'auth.setup.ts', cls: 'tc-pass', desc: 'Generic login fixture — logs in per role and saves storageState' },
+          ],
+        },
+        {
+          name: 'assets/', cls: 'tc-assets', open: true,
+          desc: 'Prism design system files',
+          children: [
+            { name: 'playwright-theme.css', cls: 'tc-purple', desc: 'Prism — dark/light CSS design system, all tokens + components' },
+            { name: 'report-template.html', cls: 'tc-purple', desc: 'Blank Prism HTML shell — copy and fill in sections' },
+          ],
+        },
+        { name: 'playwright.base.config.ts', cls: 'tc-muted', desc: 'Base Playwright config — extended by every project' },
+      ],
+    },
+    {
+      name: 'projects/', cls: 'tc-projects', open: true,
+      desc: 'One folder per application under test',
+      children: [
+        {
+          name: 'happyq/', cls: 'tc-projects', open: true,
+          desc: 'HappyQ — first project (53 tests, 5 roles, 40+ screens)',
+          children: [
+            { name: 'playwright.config.ts', cls: 'tc-muted', desc: 'Extends base, sets BASE_URL, roles, globalSetup, JSON reporter' },
+            { name: 'global-setup.ts',      cls: 'tc-muted', desc: 'Runs cleanup (CLEANUP=true) and generates Run ID before tests start' },
+            { name: '.env.local',           cls: 'tc-muted', desc: 'Credentials — gitignored. Copy from .env.example and fill in.' },
+            { name: '.env.example',         cls: 'tc-muted', desc: 'Template — committed. Documents all required env vars.' },
+            {
+              name: 'data/', cls: 'tc-muted', open: true,
+              desc: 'Excel testbook',
+              children: [
+                { name: 'HappyQ_Tests.xlsx', cls: 'tc-pass', desc: '4 sheets: TEST_CONTROL (run flags), E2E_TESTS, TEST_USERS, RESULTS' },
+              ],
+            },
+            {
+              name: 'pages/', cls: 'tc-muted', open: false,
+              desc: 'Page Object Model — one class per screen',
+              children: [
+                { name: '<module>/<Screen>Page.ts',     cls: 'tc-muted', desc: 'One file per screen: goto(), expectLoaded(), action methods' },
+                { name: '<module>/dialogs/<x>Dialog.ts', cls: 'tc-muted', desc: 'One file per modal: expectOpen(), fill(), submit(), cancel()' },
+              ],
+            },
+            {
+              name: 'tests/', cls: 'tc-muted', open: false,
+              desc: 'E2E test files — one per module',
+              children: [
+                { name: 'auth/auth.setup.ts',      cls: 'tc-muted', desc: 'Logs in once per role, saves .auth/<role>.json' },
+                { name: '<module>/<module>.e2e.ts', cls: 'tc-muted', desc: 'E2E tests using page objects — one describe per screen' },
+              ],
+            },
+            {
+              name: 'reports/', cls: 'tc-muted', open: false,
+              desc: 'Auto-generated Prism HTML reports',
+              children: [
+                { name: 'report-latest.html',           cls: 'tc-purple', desc: 'Always the most recent run — overwritten each time' },
+                { name: 'report-YYYYMMDD-HHmm.html',    cls: 'tc-purple', desc: 'Dated archive — one file per run, kept forever' },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'onlinebooking/', cls: 'tc-muted', open: false,
+          desc: 'Next project — just run: npm run new:project -- --name onlinebooking',
+          children: [
+            { name: '(same structure as happyq/)', cls: 'tc-muted', desc: 'All core infrastructure shared — zero setup overhead' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'scripts/', cls: 'tc-scripts', open: true,
+      desc: 'Framework tooling — all commands',
+      children: [
+        { name: 'new-project.mjs',           cls: 'tc-amber', desc: 'Scaffolds new project. With --src: scans source, generates page objects + stubs' },
+        { name: 'update-testbook.mjs',        cls: 'tc-amber', desc: 'Smart-merges test rows into Excel — preserves user-edited TEST_DATA / RUN / NOTES' },
+        { name: 'setup-test-users.mjs',       cls: 'tc-amber', desc: 'Enables email/password login for existing Supabase users (run after db:reset)' },
+        { name: 'generate-report.mjs',        cls: 'tc-amber', desc: 'Reads Playwright JSON, generates dated Prism HTML report. Auto-runs post-test.' },
+        { name: 'generate-architecture.mjs',  cls: 'tc-amber', desc: 'Generates this document. Re-run to refresh: npm run generate:architecture' },
+        { name: 'heal-selectors.mjs',         cls: 'tc-pass',  desc: 'Heals expectLoaded() heading selectors from live DOM' },
+        { name: 'heal-actions.mjs',           cls: 'tc-pass',  desc: 'Heals button / tab / radio / placeholder selectors in action methods' },
+        { name: 'heal-dialogs.mjs',           cls: 'tc-pass',  desc: 'Heals dialog fill() / submit() / cancel() selectors from live DOM' },
+        {
+          name: 'testdata/', cls: 'tc-muted', open: true,
+          desc: 'Per-project test case definitions',
+          children: [
+            { name: 'happyq.mjs',         cls: 'tc-amber', desc: 'HappyQ test rows — add new modules here, then run update:testbook' },
+            { name: '<project>.mjs',      cls: 'tc-muted', desc: 'One file per project — same structure as happyq.mjs' },
+          ],
+        },
+        {
+          name: 'lib/', cls: 'tc-muted', open: true,
+          desc: 'Shared script utilities',
+          children: [
+            { name: 'html-builder.mjs', cls: 'tc-purple', desc: 'Prism component functions: getBaseHtml(), createSection(), createTable(), createPill(), createFolderTree()...' },
+            { name: 'detector.mjs',     cls: 'tc-muted',  desc: 'Auto-detects app framework from package.json + folder structure' },
+            { name: 'scanner.mjs',      cls: 'tc-muted',  desc: 'Scans routes, components, and dialog files from app source code' },
+            { name: 'generator.mjs',    cls: 'tc-muted',  desc: 'Generates page objects, dialog classes, test stubs, and TODO_REPORT.md' },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'CLAUDE.md', cls: 'tc-purple',
+      desc: 'AI conventions — auto-read by Claude Code. Enforces all patterns, scenarios, compliance reports.',
+    },
+    { name: 'CONVENTIONS.md', cls: 'tc-muted', desc: 'Human reference — page object rules, dialog rules, test file rules, Excel schema' },
+    { name: 'DEVELOPMENT.md', cls: 'tc-muted', desc: 'Day-to-day guide — all commands, selector verification, debugging, CI setup' },
+    { name: 'README.md',      cls: 'tc-muted', desc: 'ADAPT overview, quick start, and links' },
+  ],
+}, 'arch');
 
 const layersTable = createTable(
   ['Layer', 'What It Is', 'Who Changes It', 'When'],
