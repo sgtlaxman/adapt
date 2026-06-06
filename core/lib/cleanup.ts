@@ -1,6 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
-
 const ADAPT_TAG = 'ADAPT-';
+
+async function restGet(url: string, headers: Record<string, string>): Promise<any[]> {
+  const res = await fetch(url, { headers });
+  if (!res.ok) throw new Error(`GET ${url} failed: ${res.status} ${await res.text()}`);
+  return res.json();
+}
+
+async function restDelete(url: string, headers: Record<string, string>): Promise<void> {
+  const res = await fetch(url, { method: 'DELETE', headers });
+  if (!res.ok) throw new Error(`DELETE ${url} failed: ${res.status} ${await res.text()}`);
+}
 
 /**
  * Deletes all test data created by previous ADAPT runs.
@@ -10,68 +19,70 @@ const ADAPT_TAG = 'ADAPT-';
  * MUST only be pointed at a test/staging instance, never production.
  *
  * Tables cleaned (in order to respect FK constraints):
- *   1. invoices + invoice_items  → cascade from appointments
- *   2. appointments              → cascade from patients
- *   3. patients                  → primary cleanup target
- *   4. tasks                     → standalone
- *   5. documents                 → standalone
+ *   1. appointments              → cascade from patients
+ *   2. patients                  → primary cleanup target
+ *   3. tasks                     → standalone
+ *   4. documents                 → standalone
  */
 export async function cleanupAdaptData(supabaseUrl: string, serviceRoleKey: string): Promise<void> {
-  const client = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
+  const base = `${supabaseUrl}/rest/v1`;
+  const headers = {
+    apikey: serviceRoleKey,
+    Authorization: `Bearer ${serviceRoleKey}`,
+    Prefer: 'return=minimal',
+  };
 
   console.log('\n[ADAPT] Starting cleanup of previous run data...');
 
   const results: { table: string; deleted: number }[] = [];
 
-  // 1. Patients (appointments, bills cascade via FK)
-  const { data: patients, error: patErr } = await client
-    .from('patients')
-    .select('id, name')
-    .ilike('name', `%${ADAPT_TAG}%`);
+  // 1. Patients tagged with ADAPT-
+  const patients = await restGet(
+    `${base}/patients?select=id&name=ilike.*${ADAPT_TAG}*`,
+    headers
+  ).catch((e) => { console.warn(`[ADAPT] Cleanup warning — patients fetch: ${e.message}`); return []; });
 
-  if (patErr) {
-    console.warn(`[ADAPT] Cleanup warning — patients: ${patErr.message}`);
-  } else if (patients && patients.length > 0) {
-    const ids = patients.map((p) => p.id);
+  if (patients.length > 0) {
+    const ids = patients.map((p: any) => p.id);
+    const idList = `(${ids.join(',')})`;
 
-    // Delete appointments first (invoices cascade from appointments)
-    await client.from('appointments').delete().in('patient_id', ids);
+    // Delete appointments first (invoices cascade from appointments via FK)
+    await restDelete(`${base}/appointments?patient_id=in.${idList}`, headers)
+      .catch((e) => console.warn(`[ADAPT] Cleanup warning — appointments: ${e.message}`));
 
     // Delete patients
-    const { error: delErr } = await client.from('patients').delete().in('id', ids);
-    if (delErr) console.warn(`[ADAPT] Cleanup warning — delete patients: ${delErr.message}`);
-    else results.push({ table: 'patients', deleted: ids.length });
+    await restDelete(`${base}/patients?id=in.${idList}`, headers)
+      .catch((e) => console.warn(`[ADAPT] Cleanup warning — delete patients: ${e.message}`));
+
+    results.push({ table: 'patients', deleted: ids.length });
   }
 
   // 2. Tasks
-  const { data: tasks, error: taskErr } = await client
-    .from('tasks')
-    .select('id')
-    .ilike('title', `%${ADAPT_TAG}%`);
+  const tasks = await restGet(
+    `${base}/tasks?select=id&title=ilike.*${ADAPT_TAG}*`,
+    headers
+  ).catch((e) => { console.warn(`[ADAPT] Cleanup warning — tasks fetch: ${e.message}`); return []; });
 
-  if (taskErr) {
-    console.warn(`[ADAPT] Cleanup warning — tasks: ${taskErr.message}`);
-  } else if (tasks && tasks.length > 0) {
-    await client.from('tasks').delete().in('id', tasks.map((t) => t.id));
+  if (tasks.length > 0) {
+    const idList = `(${tasks.map((t: any) => t.id).join(',')})`;
+    await restDelete(`${base}/tasks?id=in.${idList}`, headers)
+      .catch((e) => console.warn(`[ADAPT] Cleanup warning — delete tasks: ${e.message}`));
     results.push({ table: 'tasks', deleted: tasks.length });
   }
 
   // 3. Documents
-  const { data: docs, error: docErr } = await client
-    .from('documents')
-    .select('id')
-    .ilike('title', `%${ADAPT_TAG}%`);
+  const docs = await restGet(
+    `${base}/documents?select=id&title=ilike.*${ADAPT_TAG}*`,
+    headers
+  ).catch((e) => { console.warn(`[ADAPT] Cleanup warning — documents fetch: ${e.message}`); return []; });
 
-  if (docErr) {
-    console.warn(`[ADAPT] Cleanup warning — documents: ${docErr.message}`);
-  } else if (docs && docs.length > 0) {
-    await client.from('documents').delete().in('id', docs.map((d) => d.id));
+  if (docs.length > 0) {
+    const idList = `(${docs.map((d: any) => d.id).join(',')})`;
+    await restDelete(`${base}/documents?id=in.${idList}`, headers)
+      .catch((e) => console.warn(`[ADAPT] Cleanup warning — delete documents: ${e.message}`));
     results.push({ table: 'documents', deleted: docs.length });
   }
 
-  // Summary
   if (results.length === 0) {
     console.log('[ADAPT] Cleanup complete — no previous run data found.');
   } else {
