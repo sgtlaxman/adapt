@@ -2,45 +2,73 @@ name: ADAPT — HappyQ E2E (Nightly)
 
 on:
   schedule:
-    - cron: '0 1 * * *'   # 1am UTC daily
-  workflow_dispatch:        # Allow manual trigger from GitHub UI
+    - cron: '0 20 * * *'   # 1am IST (UTC+5:30) = 8pm UTC
+  workflow_dispatch:
+    inputs:
+      cleanup:
+        description: 'Delete ADAPT-tagged test data before run'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   e2e-nightly:
+    name: E2E Tests — Staging
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 60
 
-      - name: Set up Node
+    env:
+      BASE_URL:                        ${{ secrets.HAPPYQ_STAGING_URL }}
+      ENV:                             staging
+      CLEANUP:                         ${{ github.event.inputs.cleanup || 'true' }}
+      TEST_USER_STANDARD_EMAIL:        ${{ secrets.TEST_USER_STANDARD_EMAIL }}
+      TEST_USER_STANDARD_PASSWORD:     ${{ secrets.TEST_USER_STANDARD_PASSWORD }}
+      TEST_USER_RECEPTIONIST_EMAIL:    ${{ secrets.TEST_USER_RECEPTIONIST_EMAIL }}
+      TEST_USER_RECEPTIONIST_PASSWORD: ${{ secrets.TEST_USER_RECEPTIONIST_PASSWORD }}
+      TEST_USER_DOCTOR_EMAIL:          ${{ secrets.TEST_USER_DOCTOR_EMAIL }}
+      TEST_USER_DOCTOR_PASSWORD:       ${{ secrets.TEST_USER_DOCTOR_PASSWORD }}
+      TEST_USER_ACCOUNTANT_EMAIL:      ${{ secrets.TEST_USER_ACCOUNTANT_EMAIL }}
+      TEST_USER_ACCOUNTANT_PASSWORD:   ${{ secrets.TEST_USER_ACCOUNTANT_PASSWORD }}
+      TEST_USER_ADMIN_EMAIL:           ${{ secrets.TEST_USER_ADMIN_EMAIL }}
+      TEST_USER_ADMIN_PASSWORD:        ${{ secrets.TEST_USER_ADMIN_PASSWORD }}
+      SLACK_WEBHOOK_URL:               ${{ secrets.SLACK_WEBHOOK_URL }}
+      SUPABASE_URL:                    ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY:       ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
+      - name: Install Chromium
         run: npx playwright install chromium
 
-      - name: Run full HappyQ E2E suite
-        env:
-          BASE_URL: ${{ secrets.HAPPYQ_STAGING_URL }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          TEST_USER_STANDARD_EMAIL: ${{ secrets.TEST_USER_STANDARD_EMAIL }}
-          TEST_USER_STANDARD_PASSWORD: ${{ secrets.TEST_USER_STANDARD_PASSWORD }}
-          TEST_USER_FRONT_DESK_EMAIL: ${{ secrets.TEST_USER_FRONT_DESK_EMAIL }}
-          TEST_USER_FRONT_DESK_PASSWORD: ${{ secrets.TEST_USER_FRONT_DESK_PASSWORD }}
-          TEST_USER_CLINICIAN_EMAIL: ${{ secrets.TEST_USER_CLINICIAN_EMAIL }}
-          TEST_USER_CLINICIAN_PASSWORD: ${{ secrets.TEST_USER_CLINICIAN_PASSWORD }}
-          TEST_USER_BILLING_EMAIL: ${{ secrets.TEST_USER_BILLING_EMAIL }}
-          TEST_USER_BILLING_PASSWORD: ${{ secrets.TEST_USER_BILLING_PASSWORD }}
-          ENV: staging
+      - name: Run Full HappyQ E2E Suite
         run: npm run test:happyq
 
-      - name: Upload Playwright report
+      - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-nightly
+          name: playwright-report-${{ github.run_number }}
           path: projects/happyq/playwright-report/
+          retention-days: 30
+
+      - name: Upload Test Results JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_number }}
+          path: projects/happyq/test-results.json
           retention-days: 30
