@@ -55,6 +55,12 @@ jobs:
       - name: Install Chromium
         run: npx playwright install chromium
 
+      - name: Debug Secrets
+        run: |
+          echo "SUPABASE_URL set: ${{ secrets.SUPABASE_URL != '' }}"
+          echo "SUPABASE_SERVICE_ROLE_KEY set: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}"
+          echo "BASE_URL set: ${{ secrets.HAPPYQ_STAGING_URL != '' }}"
+
       - name: Run Full HappyQ E2E Suite
         run: npm run test:happyq
 
