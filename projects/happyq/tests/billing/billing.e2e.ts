@@ -20,11 +20,22 @@ function escapeRegex(string: string) {
 }
 
 async function ensureLocationSelected(page: any) {
-  const locButton = page.getByRole('button').filter({ hasText: /City center|Chennai|All Locations/i }).first();
+  const locButton = page.getByRole('button').filter({ hasText: /City center|Chennai|Coimbatore|Cluny|All Locations/i }).first();
+  await expect(locButton).toBeVisible({ timeout: 10000 });
   const txt = await locButton.textContent();
-  if (txt && (txt.includes('All Locations') || txt.includes('Chennai'))) {
+  if (txt && !txt.includes('City center')) {
+    await page.waitForTimeout(500); // stability delay
     await locButton.click();
-    await page.getByRole('menuitem', { name: 'City center' }).click();
+    
+    const menuItem = page.getByRole('menuitem', { name: 'City center' });
+    try {
+      await expect(menuItem).toBeVisible({ timeout: 5000 });
+    } catch (e) {
+      await locButton.click();
+      await expect(menuItem).toBeVisible({ timeout: 5000 });
+    }
+    
+    await menuItem.dispatchEvent('click');
     await expect(page.getByRole('button').filter({ hasText: 'City center' })).toBeVisible({ timeout: 5000 });
   }
 }
