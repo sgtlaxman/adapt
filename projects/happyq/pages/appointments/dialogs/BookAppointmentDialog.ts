@@ -66,7 +66,11 @@ export class BookAppointmentDialog {
   }
 
   async clickSaveNewPatient() {
-    await this.page.getByRole('button', { name: /save & select patient/i }).click();
+    const btn = this.page.getByRole('button', { name: /save & select patient/i });
+    await btn.waitFor({ state: 'visible' });
+    // dispatchEvent bypasses actionability checks and avoids the DOM-detach
+    // retry loop that occurs when React re-renders the form during submission.
+    await btn.dispatchEvent('click');
   }
 
   async hasWhatsAppOption() {

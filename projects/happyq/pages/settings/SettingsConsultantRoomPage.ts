@@ -37,8 +37,29 @@ export class SettingsConsultantRoomPage extends BasePage {
 
     if (await lowerCheckbox.count() > 0) {
       await lowerCheckbox.dispatchEvent('click');
-    } else {
+    } else if (await upperCheckbox.count() > 0) {
       await upperCheckbox.dispatchEvent('click');
+    } else {
+      // Fallback: find a switch or checkbox whose associated label matches the status code.
+      // This handles apps that use IDs other than #col-N-STATUS (e.g. UUIDs or 1-based indices).
+      const statusRegex = new RegExp(statusCode, 'i');
+      const byLabel = this.page.getByLabel(statusRegex);
+      const byRole  = this.page.getByRole('switch', { name: statusRegex });
+      const byCheck = this.page.getByRole('checkbox', { name: statusRegex });
+
+      if (await byLabel.count() > 0) {
+        await byLabel.last().dispatchEvent('click');
+      } else if (await byRole.count() > 0) {
+        await byRole.last().dispatchEvent('click');
+      } else if (await byCheck.count() > 0) {
+        await byCheck.last().dispatchEvent('click');
+      } else {
+        throw new Error(
+          `Could not find status toggle for colIndex=${colIndex}, statusCode=${statusCode}. ` +
+          `Tried: #col-${colIndex}-${statusCode.toLowerCase()}, #col-${colIndex}-${statusCode.toUpperCase()}, ` +
+          `getByLabel(/${statusCode}/i), getByRole('switch'|'checkbox')`
+        );
+      }
     }
   }
 

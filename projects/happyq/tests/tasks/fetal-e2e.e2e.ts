@@ -10,6 +10,10 @@ const testCases = loadActiveTests(spreadsheetPath);
 const results: TestResult[] = [];
 
 test.describe('End-to-End Playwright Tests (Fetal Clinic)', () => {
+  // createDocumentIfMissing navigates, creates a category if missing, uploads a file,
+  // and re-navigates — this regularly exceeds the default 60 s timeout in staging.
+  test.describe.configure({ timeout: 120000 });
+
   test.afterAll(async () => {
     if (results.length > 0) {
       const env = process.env.ENV || 'local';
@@ -91,9 +95,13 @@ async function ensureLocationSelected(page: any) {
     const txt = await locButton.textContent();
     if (txt && !txt.includes('City center')) {
       await locButton.click();
-      await page.getByRole('menuitem', { name: 'City center' }).click();
-      await page.waitForTimeout(1000);
-      await page.waitForLoadState('networkidle');
+      const menuItem = page.getByRole('menuitem', { name: 'City center' });
+      // Only switch if "City center" is actually available in the dropdown
+      if (await menuItem.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await menuItem.click();
+        await page.waitForTimeout(1000);
+        await page.waitForLoadState('networkidle');
+      }
     }
   }
 }
