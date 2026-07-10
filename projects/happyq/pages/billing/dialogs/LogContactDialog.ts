@@ -17,20 +17,23 @@ export class LogContactDialog {
   constructor(private page: Page) {}
 
   async expectOpen() {
-    await expect(this.page.getByRole('dialog')).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: /log balance contact/i })).toBeVisible({ timeout: 10000 });
+    await this.page.waitForTimeout(500);
   }
 
   async fill(data: LogContactData) {
-    await this.page.getByLabel(/call outcome/i).click();
-    await this.page.getByRole('option', { name: data.outcome }).click();
+    await this.page.getByRole('combobox').first().click();
+    await this.page.getByRole('option', { name: data.outcome }).first().click();
 
-    if (data.notes) await this.page.getByLabel(/discussion notes/i).fill(data.notes);
+    if (data.notes) {
+      await this.page.locator('textarea').first().fill(data.notes);
+    }
 
     if (data.scheduleNext) {
-      await this.page.getByRole('switch', { name: /schedule next follow-up/i }).click();
-      await this.page.getByLabel(/next follow-up date/i).fill(data.scheduleNext.date);
-      await this.page.getByLabel(/assign call to/i).fill(data.scheduleNext.assignedTo);
-      await this.page.getByLabel(/call objective/i).fill(data.scheduleNext.remarks);
+      await this.page.getByRole('switch', { name: /schedule next/i }).click();
+      await this.page.locator('input[type="date"]').first().fill(data.scheduleNext.date);
+      await this.page.getByPlaceholder(/staff \/ operator name/i).fill(data.scheduleNext.assignedTo);
+      await this.page.locator('textarea').last().fill(data.scheduleNext.remarks);
     }
   }
 

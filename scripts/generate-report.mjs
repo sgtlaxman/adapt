@@ -334,6 +334,45 @@ const html = getBaseHtml({
 
 // ─── Write output files ───────────────────────────────────────────────────────
 
+// Sync results back to Excel workbook's RESULTS sheet
+if (fs.existsSync(xlsxFile)) {
+  try {
+    const wb = XLSX.readFile(xlsxFile);
+    let ws = wb.Sheets['RESULTS'];
+    let existing = ws ? XLSX.utils.sheet_to_json(ws) : [];
+    
+    // Clean up empty initial placeholder row if present
+    if (existing.length === 1 && !existing[0].TEST_ID) {
+      existing = [];
+    }
+    
+    // Append current run results
+    const newRows = allResults.map(r => ({
+      TEST_ID: r.TEST_ID,
+      TEST_NAME: r.TEST_NAME,
+      MODULE: r.MODULE,
+      SCREEN: r.SCREEN,
+      USER_ROLE: r.USER_ROLE,
+      STATUS: r.STATUS,
+      ACTUAL_RESULT: r.ACTUAL_RESULT ?? '',
+      ERROR_MESSAGE: r.ERROR_MESSAGE ?? '',
+      SCREENSHOT_PATH: r.SCREENSHOT_PATH ?? '',
+      RUN_DURATION_MS: r.RUN_DURATION_MS ?? 0,
+      RUN_AT: r.RUN_AT,
+      RUN_BY: r.RUN_BY,
+      ENV: r.ENV,
+    }));
+    
+    const allRows = [...existing, ...newRows];
+    wb.Sheets['RESULTS'] = XLSX.utils.json_to_sheet(allRows);
+    if (!wb.SheetNames.includes('RESULTS')) wb.SheetNames.push('RESULTS');
+    XLSX.writeFile(wb, xlsxFile);
+    console.log(`[ADAPT] Excel RESULTS sheet successfully updated with ${newRows.length} records.`);
+  } catch (err) {
+    console.error(`[ADAPT] Failed to write results back to Excel: ${err.message}`);
+  }
+}
+
 const timestamp    = new Date(targetRunAt).toISOString().replace(/[:.]/g, '-').slice(0, 16);
 const datedFile    = path.join(reportsDir, `report-${timestamp}.html`);
 const latestFile   = path.join(reportsDir, 'report-latest.html');

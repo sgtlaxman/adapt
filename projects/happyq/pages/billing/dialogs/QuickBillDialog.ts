@@ -17,8 +17,11 @@ export class QuickBillDialog {
   }
 
   async addService(serviceName: string) {
-    await this.page.getByPlaceholder(/add service/i).fill(serviceName);
-    await this.page.getByRole('option', { name: new RegExp(serviceName, 'i') }).first().click();
+    await this.page.getByRole('combobox').filter({ hasText: /add service/i }).first().click();
+    const input = this.page.getByPlaceholder(/search by name/i);
+    await input.waitFor({ state: 'visible' });
+    await input.fill(serviceName);
+    await this.page.getByRole('option').filter({ hasText: new RegExp(serviceName, 'i') }).first().click();
   }
 
   async addPayment(payment: QuickBillPayment) {
@@ -28,13 +31,27 @@ export class QuickBillDialog {
   }
 
   async setGlobalDiscount(amount: string) {
-    await this.page.getByLabel(/discount/i).fill(amount);
+    await this.page.getByRole('dialog').locator('span').filter({ hasText: /^Discount \(₹\)/ }).locator('..').locator('input').fill(amount);
   }
 
   async saveAndPrint() {
     await this.page.getByRole('button', { name: /save & print bill/i }).click();
-    // Confirm in nested alert dialog
-    await this.page.getByRole('button', { name: /confirm & print/i }).click();
+    // Only click Confirm & Print if the confirmation dialog appears (for unpaid/partially paid bills)
+    const confirmBtn = this.page.getByRole('button', { name: /confirm & print/i });
+    try {
+      await confirmBtn.waitFor({ state: 'visible', timeout: 3000 });
+      await confirmBtn.click();
+    } catch (e) {
+      // No confirmation needed (bill is fully paid, saved directly)
+    }
+    // Wait for the success toast to ensure the database write completed
+    await expect(this.page.getByText(/Invoice generated successfully/i).first()).toBeVisible({ timeout: 15000 });
+  }
+
+  async removePayment() {
+    const selectTrigger = this.page.getByRole('combobox').filter({ hasText: 'Cash' }).first();
+    const paymentRow = selectTrigger.locator('..').locator('..');
+    await paymentRow.locator('button').last().click();
   }
 
   async cancel() {

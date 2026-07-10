@@ -15,18 +15,18 @@ export class SettingsLocationsPage extends BasePage {
   }
 
   async fillLocationForm(data: { name: string; code?: string; phone?: string }) {
-    await this.page.getByLabel(/location name/i).fill(data.name);
-    if (data.code) await this.page.getByLabel(/code/i).fill(data.code);
-    if (data.phone) await this.page.getByLabel(/phone/i).fill(data.phone);
+    await this.page.getByLabel('Location Name', { exact: true }).fill(data.name);
+    if (data.code) await this.page.getByLabel('Location Code', { exact: true }).fill(data.code);
+    if (data.phone) await this.page.getByLabel('Phone Number', { exact: true }).fill(data.phone);
   }
 
   async save() {
-    await this.page.getByRole('button', { name: /save/i }).click();
+    await this.page.getByRole('button', { name: /Create New Location|Update Location|Save/i }).first().click();
     await this.waitForToast();
   }
 
   async searchLocation(query: string) {
-    await this.page.getByPlaceholder(/search/i).fill(query);
+    await this.page.getByPlaceholder('Search locations...').fill(query);
   }
 
   async expectLocationInList(name: string) {

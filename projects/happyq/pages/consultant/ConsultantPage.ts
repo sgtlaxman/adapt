@@ -7,12 +7,12 @@ export class ConsultantPage extends BasePage {
   async goto() { await this.page.goto('/consultant'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Consultant Room' })).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Consultant Room', exact: true })).toBeVisible();
   }
 
   async filterByQueue(queueName: string) {
     await this.page.getByRole('combobox').first().click();
-    await this.page.getByText(queueName).click();
+    await this.page.getByRole('option', { name: new RegExp(queueName, 'i') }).first().click();
   }
 
   async expectKanbanColumns() {

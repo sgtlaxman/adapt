@@ -81,3 +81,14 @@ test.describe('Patients — Add Patient', () => {
     await dialog.expectClosed();
   });
 });
+
+
+// ─── Imported Test Cases ───────────────────────────────────────────────────
+test.describe('Imported Patients Tests', () => {
+  test('PAT-E2E-007: Add patients @placeholder', async ({ page }) => {
+    // TODO: Implement test for: Add patients
+    // Expected assertion: Create a patient data
+    throw new Error('Test placeholder not implemented');
+  });
+
+});

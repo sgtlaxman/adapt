@@ -11,16 +11,17 @@ export class SettingsServicesPage extends BasePage {
   }
 
   async clickNewService() {
-    await this.page.getByRole('button', { name: /new service/i }).click();
+    await this.page.getByRole('button', { name: /Add Service|new service/i }).click();
   }
 
   async fillServiceForm(data: { name: string; price?: string }) {
-    await this.page.getByLabel(/service name|name/i).fill(data.name);
-    if (data.price) await this.page.getByLabel(/price/i).fill(data.price);
+    const container = this.page.getByRole('dialog').first();
+    await container.locator('input[name="name"]').fill(data.name);
+    if (data.price) await container.locator('input[name="base_price"]').fill(data.price);
   }
 
   async save() {
-    await this.page.getByRole('button', { name: /save/i }).click();
+    await this.page.getByRole('button', { name: 'Create Service', exact: true }).click();
     await this.waitForToast();
   }
 }

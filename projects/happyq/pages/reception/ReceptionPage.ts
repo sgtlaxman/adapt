@@ -12,6 +12,9 @@ export class ReceptionPage extends BasePage {
 
   async search(query: string) {
     await this.page.getByPlaceholder(/search by name, phone, or token/i).fill(query);
+    if (query.includes('[ADAPT-')) {
+      await expect(this.page.locator('main').locator('div.rounded-lg.border-gray-200, tr').filter({ hasText: query })).toHaveCount(1, { timeout: 10000 });
+    }
   }
 
   async switchToTableView() {
@@ -24,7 +27,7 @@ export class ReceptionPage extends BasePage {
 
   async filterByQueue(queueName: string) {
     await this.page.getByRole('combobox').first().click();
-    await this.page.getByText(queueName).click();
+    await this.page.getByRole('option', { name: queueName, exact: true }).click();
   }
 
   async expectPatientsVisible() {

@@ -10,12 +10,16 @@ export class BillingReportsPage extends BasePage {
     await expect(this.page.getByRole('heading', { name: 'Invoice Report' })).toBeVisible();
   }
 
+  async switchTab(tabName: string) {
+    await this.page.getByRole('tab', { name: new RegExp(tabName, 'i') }).click();
+  }
+
   async switchToDayInvoices() {
-    await this.page.getByRole('tab', { name: /day invoices/i }).click();
+    await this.switchTab('Day Invoices');
   }
 
   async switchToAuditLog() {
-    await this.page.getByRole('tab', { name: /day invoices/i }).click();
+    await this.switchTab('Day Summary');
   }
 
   async downloadCsv() {

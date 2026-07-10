@@ -9,24 +9,33 @@ export class BillingManagePage extends BasePage {
   }
 
   async expectLoaded() {
-    await expect(this.page.locator('[role="tablist"]')).toBeVisible({ timeout: 10000 });
+    await expect(this.page.getByRole('button', { name: /create invoice/i }).first()).toBeVisible({ timeout: 10000 });
   }
 
   async switchTab(tab: 'Invoice' | 'Payment-Add' | 'Payment-List' | 'Preview' | 'Refund') {
-    await this.page.getByRole('tab', { name: new RegExp(tab, 'i') }).click();
+    // Map internal tab names to display labels on buttons
+    const labelMap = {
+      'Invoice': /create invoice/i,
+      'Payment-Add': /add payment/i,
+      'Payment-List': /payment history/i,
+      'Preview': /preview & print/i,
+      'Refund': /refund/i
+    };
+    await this.page.getByRole('button', { name: labelMap[tab] }).click();
   }
 
   async expectInvoiceTab() {
-    await this.page.getByRole('tab', { name: /invoice/i }).click();
-    await expect(this.page.getByRole('button', { name: /create invoice/i })).toBeVisible();
+    await this.page.getByRole('button', { name: /create invoice/i }).first().click();
+    await expect(this.page.getByRole('button', { name: /finalize & record payment/i }).first()).toBeVisible();
   }
 
   async addPayment(amount: string, method: string) {
     await this.switchTab('Payment-Add');
-    await this.page.getByPlaceholder(/amount/i).fill(amount);
-    await this.page.getByRole('combobox', { name: /method/i }).click();
-    await this.page.getByText(method).click();
-    await this.page.getByRole('button', { name: /add payment/i }).click();
+    const tab = this.page.locator('.min-h-\\[400px\\]');
+    await tab.getByRole('spinbutton').first().fill(amount);
+    await tab.getByRole('combobox').first().click();
+    await this.page.getByRole('option').filter({ hasText: new RegExp(method, 'i') }).first().click();
+    await tab.getByRole('button', { name: 'Add Payment', exact: true }).click();
     await this.waitForToast();
   }
 

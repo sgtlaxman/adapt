@@ -7,15 +7,16 @@ export class SettingsVisitPurposesPage extends BasePage {
   async goto() { await this.page.goto('/settings/visit-purposes'); }
 
   async expectLoaded() {
-    await expect(this.page.getByRole('heading', { name: 'Visit Purpose' }).first()).toBeVisible();
+    await expect(this.page.getByRole('heading', { name: 'Visit Purposes' }).first()).toBeVisible();
   }
 
   async clickNewPurpose() {
-    await this.page.getByRole('button', { name: /new purpose/i }).click();
+    await this.page.getByRole('button', { name: /Add Purpose|new purpose/i }).click();
   }
 
   async save() {
-    await this.page.getByRole('button', { name: /save/i }).click();
+    // Form submit button shows 'Create' when adding a new purpose
+    await this.page.getByRole('button', { name: 'Create', exact: true }).click();
     await this.waitForToast();
   }
 }

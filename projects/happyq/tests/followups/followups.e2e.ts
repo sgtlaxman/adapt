@@ -33,3 +33,14 @@ test.describe('Follow-Ups — Dashboard', () => {
     await followUpsPage.filterByTab('Completed');
   });
 });
+
+
+// ─── Imported Test Cases ───────────────────────────────────────────────────
+test.describe('Imported Follow-Ups Tests', () => {
+  test('FOL-E2E-005: Track And Manage Patient Follow-Ups @placeholder', async ({ page }) => {
+    // TODO: Implement test for: Track And Manage Patient Follow-Ups
+    // Expected assertion: Successfully displayed follow ups details
+    throw new Error('Test placeholder not implemented');
+  });
+
+});

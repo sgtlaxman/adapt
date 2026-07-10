@@ -20,6 +20,7 @@ export default defineConfig({
     video: 'off',
     trace: 'off',
   },
+  timeout: 60000,
   retries: 0,
   reporter: [
     ['html',  { outputFolder: 'playwright-report', open: 'never' }],

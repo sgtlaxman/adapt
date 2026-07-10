@@ -27,22 +27,55 @@ export class BookAppointmentDialog {
   }
 
   async selectExistingPatient(name: string) {
-    await this.page.getByRole('combobox', { name: /patient/i }).fill(name);
-    await this.page.getByRole('option', { name: new RegExp(name, 'i') }).first().click();
+    await this.page.locator('div:has(> label:text("Patient")) ~ button[role="combobox"]').click();
+    const input = this.page.getByPlaceholder('Search by name or phone...');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(name);
+    await this.page.getByRole('option').filter({ hasText: new RegExp(name, 'i') }).first().click();
   }
 
   async selectQueue(queue: string) {
-    await this.page.getByRole('combobox', { name: /queue/i }).click();
+    await this.page.locator('label:text("Queue") ~ button[role="combobox"]').click();
     await this.page.getByRole('option', { name: queue }).click();
   }
 
   async selectVisitPurpose(purpose: string) {
-    await this.page.getByRole('combobox', { name: /visit purpose/i }).fill(purpose);
-    await this.page.getByRole('option', { name: new RegExp(purpose, 'i') }).first().click();
+    await this.page.locator('label:text("Visit Purpose") ~ button[role="combobox"]').click();
+    const input = this.page.getByPlaceholder('Search by name, code or category...');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(purpose);
+    await this.page.getByRole('option').filter({ hasText: new RegExp(purpose, 'i') }).first().click();
+  }
+
+  async clickNewPatient() {
+    await this.page.getByRole('button', { name: /new patient/i }).click();
+  }
+
+  async fillNewPatient(data: { name: string; phone: string; age?: string; spouseName?: string; gender?: 'Male' | 'Female' | 'Other' }) {
+    await this.page.getByPlaceholder('Patient Name').fill(data.name);
+    await this.page.getByPlaceholder('Mobile Number').fill(data.phone);
+    if (data.age) {
+      await this.page.getByPlaceholder('Age').fill(data.age);
+    }
+    if (data.spouseName) {
+      await this.page.getByPlaceholder('Spouse Name').fill(data.spouseName);
+    }
+    if (data.gender) {
+      await this.page.getByRole('radio', { name: data.gender, exact: true }).click();
+    }
+  }
+
+  async clickSaveNewPatient() {
+    await this.page.getByRole('button', { name: /save & select patient/i }).click();
+  }
+
+  async hasWhatsAppOption() {
+    return await this.page.locator('#notify-whatsapp').isVisible();
   }
 
   async setTime(time: string) {
-    await this.page.getByRole('combobox', { name: /time/i }).fill(time);
+    await this.page.locator('label:text("Time") ~ button[role="combobox"]').click();
+    await this.page.getByRole('option', { name: time }).click();
   }
 
   async setRemarks(remarks: string) {

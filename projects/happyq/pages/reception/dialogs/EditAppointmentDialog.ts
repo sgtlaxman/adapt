@@ -19,23 +19,29 @@ export class EditAppointmentDialog {
   }
 
   async fill(data: EditAppointmentData) {
+    const dialog = this.page.getByRole('dialog');
     if (data.time) {
-      await this.page.getByLabel(/time slot/i).click();
+      await dialog.locator('label:has-text("Time"), label:has-text("Slot")').locator('xpath=..').locator('button').first().click();
       await this.page.getByRole('option', { name: data.time }).click();
     }
     if (data.queue) {
-      await this.page.getByLabel(/queue/i).click();
+      await dialog.locator('label:has-text("Queue")').locator('xpath=..').locator('button').first().click();
       await this.page.getByRole('option', { name: data.queue }).click();
     }
     if (data.status) {
-      await this.page.getByLabel(/status/i).click();
+      await dialog.locator('label:has-text("Status")').locator('xpath=..').locator('button').first().click();
       await this.page.getByRole('option', { name: data.status }).click();
     }
     if (data.visitPurpose) {
-      await this.page.getByRole('combobox', { name: /visit purpose/i }).fill(data.visitPurpose);
-      await this.page.getByRole('option', { name: new RegExp(data.visitPurpose, 'i') }).first().click();
+      await dialog.locator('label:has-text("Purpose")').locator('xpath=..').locator('button').first().click();
+      const input = this.page.getByPlaceholder(/search clinical service|search by name/i).first();
+      await input.waitFor({ state: 'visible' });
+      await input.fill(data.visitPurpose);
+      await this.page.getByRole('option').filter({ hasText: new RegExp(data.visitPurpose, 'i') }).first().click();
     }
-    if (data.remarks) await this.page.getByLabel(/remarks/i).fill(data.remarks);
+    if (data.remarks) {
+      await dialog.locator('label:has-text("Remarks")').locator('xpath=..').locator('textarea, input').first().fill(data.remarks);
+    }
   }
 
   async save() {
