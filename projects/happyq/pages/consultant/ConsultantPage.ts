@@ -14,7 +14,8 @@ export class ConsultantPage extends BasePage {
     const combobox = this.page.getByRole('combobox').first();
     // Skip if the desired queue is already selected to avoid click-timeout on Radix
     // checked options (aria-selected="true" / data-state="checked").
-    const currentText = await combobox.textContent().catch(() => '');
+    // Use a short timeout so this quick-check doesn't stall page setup.
+    const currentText = await combobox.textContent({ timeout: 2000 }).catch(() => '');
     if (currentText && new RegExp(queueName, 'i').test(currentText)) return;
     await combobox.click();
     await this.page.getByRole('option', { name: new RegExp(queueName, 'i') }).first().click();
