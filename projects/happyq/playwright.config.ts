@@ -12,6 +12,8 @@ const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173';
 export default defineConfig({
   globalSetup: './global-setup.ts',
   testDir: './tests',
+  testIgnore: '**/scratch_test.e2e.ts',
+  grepInvert: /@placeholder/,
   use: {
     baseURL: BASE_URL,
     browserName: 'chromium',

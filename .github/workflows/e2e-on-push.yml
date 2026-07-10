@@ -50,6 +50,10 @@ jobs:
       - name: Run HappyQ E2E Tests
         run: npm run test:happyq
 
+      - name: Generate Job Summary
+        if: always()
+        run: node scripts/generate-summary.mjs
+
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
