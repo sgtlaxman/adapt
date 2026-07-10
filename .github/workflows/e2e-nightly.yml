@@ -62,7 +62,7 @@ jobs:
           echo "BASE_URL set: ${{ secrets.HAPPYQ_STAGING_URL != '' }}"
 
       - name: Run Full HappyQ E2E Suite
-        run: npm run test:happyq
+        run: npm run test:happyq -- --grep-invert '@placeholder|SCRATCH-'
 
       - name: Upload Playwright Report
         if: always()
