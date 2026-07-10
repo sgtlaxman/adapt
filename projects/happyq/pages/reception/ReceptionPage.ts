@@ -13,7 +13,12 @@ export class ReceptionPage extends BasePage {
   async search(query: string) {
     await this.page.getByPlaceholder(/search by name, phone, or token/i).fill(query);
     if (query.includes('[ADAPT-')) {
-      await expect(this.page.locator('main').locator('div.rounded-lg.border-gray-200, tr').filter({ hasText: query })).toHaveCount(1, { timeout: 10000 });
+      // Use .first().toBeVisible() instead of toHaveCount(1) — the composite locator
+      // 'div.rounded-lg.border-gray-200, tr' can match multiple nested DOM nodes for a
+      // single patient card, so asserting an exact count of 1 is too strict.
+      await expect(
+        this.page.locator('main').locator('div.rounded-lg.border-gray-200, tr').filter({ hasText: query }).first()
+      ).toBeVisible({ timeout: 10000 });
     }
   }
 
