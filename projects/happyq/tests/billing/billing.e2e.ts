@@ -20,16 +20,17 @@ function escapeRegex(string: string) {
 }
 
 async function ensureLocationSelected(page: any) {
-  const locButton = page.getByRole('button').filter({ hasText: /City center|Chennai|All Locations/i }).first();
+  const locButton = page.getByRole('button').filter({ hasText: /City center|Chennai|Coimbatore|Cluny|All Locations/i }).first();
   // Guard: skip entirely if no location selector is visible on this page
   if (!(await locButton.isVisible({ timeout: 3000 }).catch(() => false))) return;
   const txt = await locButton.textContent({ timeout: 3000 }).catch(() => null);
-  if (txt && (txt.includes('All Locations') || txt.includes('Chennai'))) {
+  if (txt && !txt.includes('City center')) {
+    await page.waitForTimeout(500); // stability delay
     await locButton.click();
     const menuItem = page.getByRole('menuitem', { name: 'City center' });
     // Only proceed if "City center" actually appears in the dropdown
     if (await menuItem.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await menuItem.click();
+      await menuItem.dispatchEvent('click');
       await expect(page.getByRole('button').filter({ hasText: 'City center' })).toBeVisible({ timeout: 5000 });
     }
   }
