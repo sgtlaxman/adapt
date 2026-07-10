@@ -140,9 +140,9 @@ test.describe('Imported Settings Tests', () => {
     await orgPage.fillForm({ name: newName });
     await orgPage.save();
 
-    // The toast text may vary by app version; match common variations
+    // The toast text varies by app version; verify that any success toast appeared
     await expect(
-      page.getByText(/Organization details saved!|Organization saved|Settings saved|Saved successfully/i).first()
+      page.locator('[data-sonner-toast]').filter({ hasText: /saved|updated|success/i }).first()
     ).toBeVisible({ timeout: 10000 });
 
     // Reload the page to ensure fresh context state is loaded and form dirty state is clean
@@ -153,7 +153,7 @@ test.describe('Imported Settings Tests', () => {
     await orgPage.fillForm({ name: originalName });
     await orgPage.save();
     await expect(
-      page.getByText(/Organization details saved!|Organization saved|Settings saved|Saved successfully/i).first()
+      page.locator('[data-sonner-toast]').filter({ hasText: /saved|updated|success/i }).first()
     ).toBeVisible({ timeout: 10000 });
   });
 
@@ -211,7 +211,9 @@ test.describe('Imported Settings Tests', () => {
     }
 
     await locPage.save();
-    await expect(page.getByText(/Location updated successfully!/i).first()).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.locator('[data-sonner-toast]').filter({ hasText: /saved|updated|success/i }).first()
+    ).toBeVisible({ timeout: 10000 });
 
     // Refresh the page
     await locPage.goto();

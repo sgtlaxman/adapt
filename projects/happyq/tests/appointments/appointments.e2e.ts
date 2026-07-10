@@ -185,7 +185,7 @@ test.describe('Imported Appointments Tests', () => {
     await dialog.expectOpen();
 
     // Assert that WhatsApp notification option is visible
-    const whatsAppOption = page.locator('#notify-whatsapp');
+    const whatsAppOption = page.getByRole('radio', { name: /whatsapp/i });
     await expect(whatsAppOption).toBeVisible({ timeout: 5000 });
   });
 

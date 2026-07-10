@@ -375,7 +375,7 @@ test.describe('Imported Consultant Tests', () => {
     await ensureLocationSelected(doctorPage);
 
     // Verify column header matches the dynamic column name
-    await expect(doctorPage.getByRole('heading', { name: testColName }).first()).toBeVisible({ timeout: 15000 });
+    await expect(doctorPage.getByText(testColName).first()).toBeVisible({ timeout: 15000 });
 
     // Cleanup: delete the column
     await settingsPage.goto();

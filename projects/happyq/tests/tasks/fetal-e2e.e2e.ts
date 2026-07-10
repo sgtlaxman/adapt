@@ -225,6 +225,8 @@ async function createDocumentIfMissing(page: any, title: string) {
   await page.getByRole('button', { name: 'Save Document' }).click();
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000);
+  // Verify the document appears in the list so callers can rely on it existing.
+  await expect(page.getByText(new RegExp(title, 'i')).first()).toBeVisible({ timeout: 15000 });
 }
 
 async function runE2EJourney(page: any, testId: string, data: any) {
