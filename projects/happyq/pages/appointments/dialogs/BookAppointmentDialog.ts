@@ -74,7 +74,7 @@ export class BookAppointmentDialog {
   }
 
   async hasWhatsAppOption() {
-    return await this.page.locator('#notify-whatsapp').isVisible();
+    return await this.page.getByRole('radio', { name: /whatsapp/i }).isVisible();
   }
 
   async setTime(time: string) {
