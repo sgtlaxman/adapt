@@ -1,17 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { loadActiveTests } from '../../../../../happyq/tests/spreadsheet-reader';
-import { writeResults, TestResult } from '../../../../../happyq/tests/results-writer';
+import { loadActiveTests } from '../../../../core/lib/spreadsheet-reader';
+import { writeResults, TestResult } from '../../../../core/lib/results-writer';
 import path from 'path';
 
 test.use({ storageState: path.resolve(__dirname, '../../.auth/admin.json') });
 
-const testCases = loadActiveTests('E2E');
+const spreadsheetPath = path.resolve(__dirname, '../../data/HappyQ_Tests.xlsx');
+const testCases = loadActiveTests(spreadsheetPath);
 const results: TestResult[] = [];
 
 test.describe('End-to-End Playwright Tests (Fetal Clinic)', () => {
   test.afterAll(async () => {
     if (results.length > 0) {
-      writeResults(results);
+      const env = process.env.ENV || 'local';
+      writeResults(spreadsheetPath, results, env);
     }
   });
 
@@ -30,8 +32,9 @@ test.describe('End-to-End Playwright Tests (Fetal Clinic)', () => {
         results.push({
           testId: tc.testId,
           testName: tc.testName,
-          layer: tc.layer,
-          priority: tc.priority,
+          module: tc.module,
+          screen: tc.screen,
+          userRole: tc.userRole,
           status: 'PASS',
           actualResult: 'User journey completed successfully',
           durationMs: Date.now() - start,
@@ -40,8 +43,9 @@ test.describe('End-to-End Playwright Tests (Fetal Clinic)', () => {
         results.push({
           testId: tc.testId,
           testName: tc.testName,
-          layer: tc.layer,
-          priority: tc.priority,
+          module: tc.module,
+          screen: tc.screen,
+          userRole: tc.userRole,
           status: 'FAIL',
           actualResult: '',
           durationMs: Date.now() - start,
