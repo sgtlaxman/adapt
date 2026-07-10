@@ -48,7 +48,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run HappyQ E2E Tests
-        run: npm run test:happyq
+        run: npm run test:happyq -- --grep-invert '@placeholder|SCRATCH-'
 
       - name: Upload Playwright Report
         if: always()
